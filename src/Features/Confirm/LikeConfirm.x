@@ -1,33 +1,34 @@
 #import "../../Manager.h"
 #import "../../Utils.h"
+#import "../../InstagramHeaders.h"
 
 ///////////////////////////////////////////////////////////
 
-// Confirmation handlers
+// Onay işleyiciler
 
-#define CONFIRMPOSTLIKE(orig)                             \
-    if ([SCIManager getBoolPref:@"like_confirm"]) {           \
-        NSLog(@"[SCInsta] Confirm post like triggered");  \
-                                                          \
-        [SCIUtils showConfirmation:^(void) { orig; }];    \
-    }                                                     \
-    else {                                                \
-        return orig;                                      \
-    }                                                     \
+#define CONFIRMPOSTLIKE(orig)                                                      \
+    if ([SCIManager getBoolPref:@"like_confirm"]) {                                \
+        NSLog(@"[SCInsta] Gönderi beğenme onayı. ❤️👍✅🔒"); \
+                                                                                   \
+        [SCIUtils showConfirmation:^(void) { orig; }];                             \
+    }                                                                              \
+    else {                                                                         \
+        return orig;                                                               \
+    }                                                                              \
 
-#define CONFIRMREELSLIKE(orig)                            \
-    if ([SCIManager getBoolPref:@"like_confirm_reels"]) {     \
-        NSLog(@"[SCInsta] Confirm reels like triggered"); \
-                                                          \
-        [SCIUtils showConfirmation:^(void) { orig; }];    \
-    }                                                     \
-    else {                                                \
-        return orig;                                      \
-    }                                                     \
+#define CONFIRMREELSLIKE(orig)                                                     \
+    if ([SCIManager getBoolPref:@"like_confirm_reels"]) {                          \
+        NSLog(@"[SCInsta] Reels beğenme onayı. 🎬❤️✅🔒"); \
+                                                                                   \
+        [SCIUtils showConfirmation:^(void) { orig; }];                             \
+    }                                                                              \
+    else {                                                                         \
+        return orig;                                                               \
+    }                                                                              \
 
 ///////////////////////////////////////////////////////////
 
-// Liking posts
+// Gönderileri beğenme
 %hook IGUFIButtonBarView
 - (void)_onLikeButtonPressed:(id)arg1 {
     CONFIRMPOSTLIKE(%orig);
@@ -49,7 +50,7 @@
 }
 %end
 
-// Liking reels
+// Reels'ı beğenme
 %hook IGSundialViewerVideoCell
 - (void)controlsOverlayControllerDidTapLikeButton:(id)arg1 {
     CONFIRMREELSLIKE(%orig);
@@ -73,12 +74,12 @@
 - (void)controlsOverlayControllerDidTapLikeButton:(id)arg1 {
     CONFIRMREELSLIKE(%orig);
 }
-- (void)gestureController:(id)arg1 didObserveDoubleTap:(id)arg2 {
+- (void)gestureController:(id)arg1 didObserveDoubleTap:(id)arg1 {
     CONFIRMREELSLIKE(%orig);
 }
 %end
 
-// Liking comments
+// Yorumları beğenme
 %hook IGCommentCellController
 - (void)commentCell:(id)arg1 didTapLikeButton:(id)arg2 {
     CONFIRMPOSTLIKE(%orig);
@@ -102,7 +103,7 @@
 }
 %end
 
-// Liking stories
+// Hikayeleri beğenme
 %hook IGStoryFullscreenDefaultFooterView
 - (void)_handleLikeTapped {
     CONFIRMPOSTLIKE(%orig);
@@ -115,7 +116,7 @@
 }
 %end
 
-// DM like button (seems to be hidden)
+// DM beğen butonu (gizli gibi görünüyor)
 %hook IGDirectThreadViewController
 - (void)_didTapLikeButton {
     CONFIRMPOSTLIKE(%orig);
