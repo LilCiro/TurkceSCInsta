@@ -73,11 +73,13 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     rm -rf .theos
 
     # Orijinal Instagram IPA dosyasını kontrol et 🔍
+    # Not: Bu IPA'nın varlığı kritik. GitHub Actions workflow'unda indirildiğinden emin olun.
     ipaFile="$(find ./packages/*com.burbn.instagram*.ipa -type f -exec basename {} \;)"
     if [ -z "${ipaFile}" ]; then
         echo -e '\033[1m\033[0;31m./packages/com.burbn.instagram.ipa bulunamadı. ❌\nLütfen şifresi çözülmüş bir Instagram IPA dosyasını bu yola yerleştirin.\033[0m'
         exit 1
     fi
+    ORIGINAL_IPA_PATH="./packages/${ipaFile}"
 
     echo "IPA dosyası açılıyor ve hazırlanıyor..."
     # IPA'yı geçici bir dizine aç
@@ -85,7 +87,7 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     rm -rf "$IPA_EXTRACT_DIR" # Önceki kalıntıları temizle
     mkdir -p "$IPA_EXTRACT_DIR"
 
-    unzip -q "packages/${ipaFile}" -d "$IPA_EXTRACT_DIR"
+    unzip -q "$ORIGINAL_IPA_PATH" -d "$IPA_EXTRACT_DIR"
 
     # Payload klasörünü doğrulama ve taşıma
     if [ ! -d "${IPA_EXTRACT_DIR}/Payload" ]; then
@@ -169,28 +171,27 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     echo "Değiştirilmiş uygulamayı geçici IPA'ya sıkıştırılıyor..."
     TEMP_MODIFIED_IPA_PATH="packages/temp_modified_base.ipa"
     
-    # Yeni bir geçici dizin oluştur (buraya Payload ve .app taşınacak)
-    FINAL_ZIP_SOURCE_DIR="packages/final_zip_source"
-    rm -rf "$FINAL_ZIP_SOURCE_DIR"
-    mkdir -p "$FINAL_ZIP_SOURCE_DIR/Payload" # Zip dosyasının içinde Payload klasörü olacak
+    # Yeni bir geçici dizin oluştur (burada sadece Payload klasörü olacak)
+    FINAL_IPA_STRUCTURE_DIR="packages/final_ipa_structure"
+    rm -rf "$FINAL_IPA_STRUCTURE_DIR"
+    mkdir -p "$FINAL_IPA_STRUCTURE_DIR/Payload"
 
-    # Modifiye edilmiş .app paketini, sıkıştırma için hazırlanmış Payload dizinine taşı
-    # Bu adımda APP_DIR, packages/modded_ipa_base/Payload/Instagram.app gibi olmalı
-    # Bu yüzden buraya direkt APP_DIR'ı taşıyoruz
-    mv "$APP_DIR" "$FINAL_ZIP_SOURCE_DIR/Payload/" 
+    # Modifiye edilmiş .app paketini, sıkıştırma için hazırlanmış Payload dizinine kopyala
+    # 'mv' yerine 'cp -r' kullanarak orijinal 'IPA_BASE_DIR' yapısını koruyoruz
+    cp -r "$APP_DIR" "$FINAL_IPA_STRUCTURE_DIR/Payload/" 
     
-    # Sıkıştırma sonrası kalacak olan modifiye edilmiş base dizini temizle
+    # Kopyalama sonrası eski modifiye edilmiş base dizini temizle
     rm -rf "$IPA_BASE_DIR"
 
-    # `final_zip_source` dizinine gidip, `Payload` klasörünü sıkıştır
-    cd "$FINAL_ZIP_SOURCE_DIR"
+    # 'final_ipa_structure' dizinine geçip, 'Payload' klasörünü ve içindekileri sıkıştır
+    cd "$FINAL_IPA_STRUCTURE_DIR"
     # Sadece Payload klasörünü ve içindekileri sıkıştır.
     # Çıktı IPA ana dizine göre yolunu belirtiyoruz.
     zip -r -q "../../${TEMP_MODIFIED_IPA_PATH##*/}" Payload/
     cd ../.. # Ana dizine geri dön
 
     # Kullanılan geçici zip dizinini temizle
-    rm -rf "$FINAL_ZIP_SOURCE_DIR"
+    rm -rf "$FINAL_IPA_STRUCTURE_DIR"
 
     # Oluşturulan geçici IPA dosyasının varlığını kontrol et
     if [ ! -f "$TEMP_MODIFIED_IPA_PATH" ]; then
