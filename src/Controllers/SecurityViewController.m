@@ -25,7 +25,7 @@
     [self.view addSubview:blurView];
     
     UIButton *authenticateButton = [[UIButton alloc] initWithFrame:CGRectMake(20, 20, 200, 60)];
-    [authenticateButton setTitle:@"Click to unlock app" forState:UIControlStateNormal];
+    [authenticateButton setTitle:@"Uygulamanın kilidini açmak için tıklayın" forState:UIControlStateNormal]; // Burası güncellendi
     authenticateButton.center = self.view.center;
     [authenticateButton addTarget:self action:@selector(authenticate) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:authenticateButton];
@@ -37,10 +37,10 @@
     LAContext *context = [[LAContext alloc] init];
     NSError *error = nil;
 
-    NSLog(@"[SCInsta] Padlock authentication: Prompting for unlock");
+    NSLog(@"[SCInsta] Kilit ekranı kimlik doğrulaması: Kilidi açmak için komut isteniyor. 🔐📱✨🔒"); // Burası güncellendi
 
     if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&error]) {
-        NSString *reason = @"Authenticate to unlock app";
+        NSString *reason = @"Uygulamanın kilidini açmak için kimlik doğrulayın"; // Burası güncellendi
         
         [context evaluatePolicy:LAPolicyDeviceOwnerAuthentication localizedReason:reason reply:^(BOOL success, NSError *authenticationError) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -49,20 +49,20 @@
 
                     isAuthenticationBeingShown = NO;
 
-                    NSLog(@"[SCInsta] Padlock authentication: Unlock success");
+                    NSLog(@"[SCInsta] Kilit ekranı kimlik doğrulaması: Kilit başarıyla açıldı. ✅🔓🌟👍"); // Burası güncellendi
                 }
                 else {
-                    NSLog(@"[SCInsta] Padlock authentication: Unlock failed");
+                    NSLog(@"[SCInsta] Kilit ekranı kimlik doğrulaması: Kilit açma başarısız. ❌🚫🚨👎"); // Burası güncellendi
                 }
             });
         }];
     }
     else {
-        NSLog(@"[SCInsta] Padlock authentication: Device authentication not available");
+        NSLog(@"[SCInsta] Kilit ekranı kimlik doğrulaması: Cihaz kimlik doğrulaması mevcut değil. ⚠️📵⛔❓"); // Burası güncellendi
 
-        // Notify user
+        // Kullanıcıya bildir
         JGProgressHUD *HUD = [[JGProgressHUD alloc] init];
-        HUD.textLabel.text = @"Authentication not available";
+        HUD.textLabel.text = @"Kimlik doğrulama mevcut değil"; // Burası güncellendi
         HUD.indicatorView = [[JGProgressHUDErrorIndicatorView alloc] init];
 
         [HUD showInView:topMostController().view];
