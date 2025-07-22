@@ -1,8 +1,13 @@
+@interface SettingsViewController ()
+@property (nonatomic, strong) NSMutableArray *_specifiers;
+@end
+
 @implementation SettingsViewController
 
+// Tweak settings
 - (NSArray *)specifiers {
-    if (!_specifiers) {
-        _specifiers = [NSMutableArray arrayWithArray:@[
+    if (!self._specifiers) {
+        self._specifiers = [NSMutableArray arrayWithArray:@[
             [self newLinkCellWithTitle:@"Bağış Yap 💖" detailTitle:@"Bu tweak'i desteklemek için bağış yapmayı düşünün <3" url:@"https://ko-fi.com/socuul" iconURL:@"https://i.imgur.com/g4U5AMi.png" iconTransparentBG:YES],
 
             // Bölüm 1: Genel
@@ -83,11 +88,11 @@
             [self newLinkCellWithTitle:@"Repoyu Görüntüle" detailTitle:@"Fork edilmiş tweakin kaynak kodunu GitHub'da görüntüle" url:@"https://github.com/LilCiro" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES],
             [self newLinkCellWithTitle:@"Orijinal Repoyu Görüntüle" detailTitle:@"Orijinal tweakin kaynak kodunu GitHub'da görüntüle" url:@"https://github.com/SoCuul/SCInsta" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES]
         ]];
-        
-        [self collectDynamicSpecifiersFromArray:_specifiers];
+
+        [self collectDynamicSpecifiersFromArray:self._specifiers];
     }
-    
-    return _specifiers;
+
+    return [self._specifiers copy];
 }
 
 @end
