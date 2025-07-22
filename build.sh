@@ -61,7 +61,7 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     make clean
     rm -rf .theos
 
-    # Orijinal Instagram IPA dosyasını kontrol et ve aç 🔍
+    # Orijinal Instagram IPA dosyasını kontrol et 🔍
     ipaFile="$(find ./packages/*com.burbn.instagram*.ipa -type f -exec basename {} \;)"
     if [ -z "${ipaFile}" ]; then
         echo -e '\033[1m\033[0;31m./packages/com.burbn.instagram.ipa bulunamadı. ❌\nLütfen şifresi çözülmüş bir Instagram IPA dosyasını bu yola yerleştirin.\033[0m'
@@ -70,19 +70,38 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
 
     echo "IPA dosyası açılıyor ve hazırlanıyor..."
     # IPA'yı geçici bir dizine aç
-    unzip -q "packages/${ipaFile}" -d "packages/temp_ipa_content"
-    # Payload klasörünü al (içinde .app bulunur)
-    mv "packages/temp_ipa_content/Payload" "packages/Payload"
-    # Geçici dizini temizle
-    rm -rf "packages/temp_ipa_content"
+    IPA_EXTRACT_DIR="packages/extracted_ipa_temp"
+    rm -rf "$IPA_EXTRACT_DIR" # Önceki kalıntıları temizle
+    mkdir -p "$IPA_EXTRACT_DIR"
+
+    unzip -q "packages/${ipaFile}" -d "$IPA_EXTRACT_DIR"
+
+    # Payload klasörünü doğrulama ve taşıma
+    if [ ! -d "${IPA_EXTRACT_DIR}/Payload" ]; then
+        echo "Hata: IPA içinde 'Payload' klasörü bulunamadı. IPA yapısı beklenenden farklı."
+        exit 1
+    fi
+
+    # Payload klasörünü yeni, kalıcı bir yere taşı (burayı IPA_BASE_DIR olarak kullanacağız)
+    IPA_BASE_DIR="packages/modded_ipa_base"
+    rm -rf "$IPA_BASE_DIR" # Önceki kalıntıları temizle
+    mv "${IPA_EXTRACT_DIR}/Payload" "$IPA_BASE_DIR"
+    rm -rf "$IPA_EXTRACT_DIR" # Geçici çıkarma dizinini temizle
 
     # Uygulamanın tam yolunu belirle
-    APP_DIR="packages/Payload/Instagram.app"
+    # Payload klasörünün içinde sadece bir .app dosyası olmalı
+    APP_DIR=$(find "${IPA_BASE_DIR}" -maxdepth 1 -type d -name "*.app" | head -n 1)
+
+    if [ -z "$APP_DIR" ]; then
+        echo "Hata: '${IPA_BASE_DIR}' içinde .app paketi bulunamadı. IPA yapısı bozuk olabilir."
+        exit 1
+    fi
+
     INFO_PLIST="${APP_DIR}/Info.plist"
 
     # Info.plist dosyasının varlığını kontrol et
     if [ ! -f "$INFO_PLIST" ]; then
-        echo "Hata: Info.plist dosyası '$INFO_PLIST' bulunamadı. IPA yapısı beklenenden farklı olabilir."
+        echo "Hata: Info.plist dosyası '$INFO_PLIST' bulunamadı. .app paketi bozuk olabilir."
         exit 1
     fi
 
@@ -138,10 +157,16 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     # --- Değiştirilmiş Uygulamayı Geçici Bir IPA'ya Sıkıştır ---
     echo "Değiştirilmiş uygulamayı geçici IPA'ya sıkıştırılıyor..."
     TEMP_MODIFIED_IPA="packages/temp_modified_base.ipa"
-    cd packages/Payload # Payload dizinine git
-    zip -r -q "../${TEMP_MODIFIED_IPA##*/}" . # Payload içeriğini sıkıştır
+    
+    # Doğrudan IPA_BASE_DIR (yani packages/modded_ipa_base/Payload) içindeki her şeyi sıkıştır
+    # Zip komutu, klasör adının da dahil edilmesini sağlamalıdır.
+    # Bu, 'Payload/Instagram.app' yapısını korur.
+    cd "$IPA_BASE_DIR" # Payload klasörünün olduğu dizine git
+    zip -r -q "../../${TEMP_MODIFIED_IPA##*/}" . # Bulunduğun dizini (Payload) ve altındaki her şeyi sıkıştır.
     cd ../.. # Ana dizine geri dön
-    rm -rf packages/Payload # Payload klasörünü temizle
+
+    # Kullanılan Payload klasörünü temizle
+    rm -rf "$IPA_BASE_DIR"
 
     # --- Tweak'i Geçici IPA'ya Enjekte Et ve Nihai IPA'yı Oluştur ---
     echo -e '\033[1m\033[32mNihai IPA dosyası oluşturuluyor... 🚀\033[0m'
@@ -164,7 +189,7 @@ elif [ "${BUILD_MODE}" == "rootless" ]; then
     rm -rf .theos
 
     export THEOS_PACKAGE_SCHEME=rootless
-    make package # MAKE_ARGS'ı make package ile birleştir (uygulama adı/geliştirici adı tweak'in deb'ini etkiler)
+    make package
 
     echo -e "\033[1m\033[32mTamamlandı, SCInsta'yı beğeneceğinizi umuyoruz! 🎉😊\n\nDeb dosyasını şu adreste bulabilirsiniz: $(pwd)/packages\033[0m"
 
@@ -177,7 +202,7 @@ elif [ "${BUILD_MODE}" == "rootful" ]; then
     rm -rf .theos
 
     unset THEOS_PACKAGE_SCHEME
-    make package # MAKE_ARGS'ı make package ile birleştir (uygulama adı/geliştirici adı tweak'in deb'ini etkiler)
+    make package
 
     echo -e "\033[1m\033[32mTamamlandı, SCInsta'yı beğeneceğinizi umuyoruz! 🎉😊\n\nDeb dosyasını şu adreste bulabilirsiniz: $(pwd)/packages\033[0m"
 
