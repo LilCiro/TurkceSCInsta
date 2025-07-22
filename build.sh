@@ -85,7 +85,6 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     # Payload klasörünü yeni, kalıcı bir yere taşı (burayı IPA_BASE_DIR olarak kullanacağız)
     IPA_BASE_DIR="packages/modded_ipa_base"
     rm -rf "$IPA_BASE_DIR" # Önceki kalıntıları temizle
-    # Sadece Payload içeriğini (yani .app'i) modded_ipa_base içine taşı
     mv "${IPA_EXTRACT_DIR}/Payload" "$IPA_BASE_DIR"
     rm -rf "$IPA_EXTRACT_DIR" # Geçici çıkarma dizinini temizle
 
@@ -161,21 +160,24 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     
     # Sıkıştırma için Payload dizinini oluştur ve .app'i içine taşı
     # Bu, 'Payload/Instagram.app' yapısını garantiler.
-    ZIP_SOURCE_DIR="packages/temp_payload_for_zip"
-    rm -rf "$ZIP_SOURCE_DIR"
-    mkdir -p "$ZIP_SOURCE_DIR/Payload"
+    ZIP_TEMP_DIR="packages/zip_temp_dir"
+    rm -rf "$ZIP_TEMP_DIR"
+    mkdir -p "$ZIP_TEMP_DIR/Payload"
     
     # Modifiye edilmiş .app paketini yeni Payload dizinine taşı
-    mv "$APP_DIR" "$ZIP_SOURCE_DIR/Payload/"
+    # mv komutunu Payload dizininin içine taşımak için / kullanmayın.
+    mv "$APP_DIR" "$ZIP_TEMP_DIR/Payload" 
     
-    # `packages` dizinine dönüp, `temp_payload_for_zip` içindeki `Payload`'ı sıkıştır
-    cd "$ZIP_SOURCE_DIR"
-    # Sadece Payload klasörünü sıkıştır, kök dizine değil.
+    # 'zip_temp_dir' dizinine gidip, 'Payload' klasörünü sıkıştır
+    cd "$ZIP_TEMP_DIR"
+    # Sadece Payload klasörünü ve içindekileri sıkıştır.
+    # Çıktı IPA ana dizine göre yolunu belirtiyoruz.
     zip -r -q "../../${TEMP_MODIFIED_IPA_PATH##*/}" Payload/
     cd ../.. # Ana dizine geri dön
 
-    # Kullanılan geçici Payload klasörünü temizle
-    rm -rf "$ZIP_SOURCE_DIR"
+    # Kullanılan geçici klasörleri temizle
+    rm -rf "$IPA_BASE_DIR" # Eski modifiye edilmiş .app'i içeren base dizin
+    rm -rf "$ZIP_TEMP_DIR" # Zip işlemi için kullanılan geçici dizin
 
     # Oluşturulan geçici IPA dosyasının varlığını kontrol et
     if [ ! -f "$TEMP_MODIFIED_IPA_PATH" ]; then
