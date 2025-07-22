@@ -93,8 +93,8 @@ TürkçeSCInsta ayarlarını değiştirmek [bu sayfaya](https://github.com/LilCi
 
 |                                             |                                             |                                             |
 | :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: |
-| <img src="https://i.imgur.com/EZIktAw.png"> | <img src="https://i.imgur.com/aA3g1Vw.png"> | <img src="https://i.imgur.com/QdyFbo4.png"> |
-| <img src="https://i.imgur.com/Ydd61cZ.png"> | <img src="https://i.imgur.com/XGOn3lY.png"> | <img src="https://i.imgur.com/n4GFWl8.png"> |
+| <img src="https://imgur.com/EOwuqn0"> | <img src="https://imgur.com/8tec0ic"> | <img src="https://imgur.com/undefined"> |
+| <img src="https://imgur.com/iafAszy"> | <img src="https://imgur.com/PgR0mS9"> | <img src="https://imgur.com/H58UhNB"> |
 
 # Kaynak Koddan Derleme
 
