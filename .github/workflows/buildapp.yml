@@ -3,13 +3,13 @@
 # https://github.com/ISnackable/YTCubePlus/blob/main/.github/workflows/Build.yml
 # https://github.com/BandarHL/BHTwitter/actions/workflows/build.yml
 
-name: SCInsta'yı Derle ve Paketle 📦🚀✨🛠️
+name: Türkçe SCInsta'yı Derle ve Paketle 📦🚀✨🛠️
 
 on:
   workflow_dispatch: # Bu iş akışını GitHub arayüzünden manuel olarak tetiklemeye izin verir. 🌐👆⚙️
     inputs:
       decrypted_instagram_url: # Şifresi çözülmüş Instagram IPA'sının doğrudan URL'si. 🔗🔐📱📥
-        description: "Şifresi çözülmüş Instagram IPA'sının doğrudan URL'si"
+        description: "Şifresi çözülmüş Instagram IPA'sının doğrudan URL'si (Nasıl yapacağınızı bilmiyorsanız sss okuyun)"
         default: ""
         required: true
         type: string
