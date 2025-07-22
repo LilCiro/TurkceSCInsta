@@ -4,7 +4,7 @@
 %hook IGDirectThreadViewController
 - (void)swipeableScrollManagerDidEndDraggingAboveSwipeThreshold:(id)arg1 {
     if ([SCIManager getBoolPref:@"shh_mode_confirm"]) {
-        NSLog(@"[SCInsta] Confirm shh mode triggered");
+        NSLog(@"[SCInsta] Sessiz mod onayı. 🤫💬✅🔒");
 
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
@@ -14,7 +14,7 @@
 
 - (void)shhModeTransitionButtonDidTap:(id)arg1 {
     if ([SCIManager getBoolPref:@"shh_mode_confirm"]) {
-        NSLog(@"[SCInsta] Confirm shh mode triggered");
+        NSLog(@"[SCInsta] Sessiz mod onayı. 🤫💬✅🔒");
 
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
@@ -24,7 +24,7 @@
 
 - (void)messageListViewControllerDidToggleShhMode:(id)arg1 {
     if ([SCIManager getBoolPref:@"shh_mode_confirm"]) {
-        NSLog(@"[SCInsta] Confirm shh mode triggered");
+        NSLog(@"[SCInsta] Sessiz mod onayı. 🤫💬✅🔒");
 
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
