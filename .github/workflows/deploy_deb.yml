@@ -1,7 +1,7 @@
 name: DEB Paketini Depoya Yükle ve Depoyu Güncelle (Manuel) 🚀📦
 
 on:
-  workflow_dispatch: # Bu iş akışını manuel olarak tetiklemeye izin verir
+  workflow_dispatch: # Bu iş akışını GitHub arayüzünden manuel olarak tetiklemeye izin verir.
 
 jobs:
   deploy_deb:
@@ -15,18 +15,17 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // En son başarılı 'Build and Package SCInsta' çalıştırmasının artifact'ını indirmeye çalışacağız.
+            // 'Türkçe SCInsta\'yı Derle ve Paketle' iş akışının en son başarılı çalıştırmasını bulur ve artifact'ını indirir.
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const workflowName = 'Build and Package SCInsta'; // Kaynak iş akışının adı
+            const workflowName = 'Türkçe SCInsta\'yı Derle ve Paketle 📦🚀✨🛠️'; // buildapp.yml dosyasının 'name' alanı
 
-            // İş akışı ID'sini bul
             const { data: workflows } = await github.rest.actions.listWorkflowRunsForRepo({
               owner,
               repo,
               workflow_id: workflowName,
               status: 'success',
-              branch: context.ref.replace('refs/heads/', ''), // Mevcut branch'i kullan
+              branch: context.ref.replace('refs/heads/', ''),
               per_page: 1
             });
 
@@ -43,6 +42,7 @@ jobs:
               run_id: latestRunId,
             });
 
+            // DEB artifact'ı arıyoruz. Adı 'SCInsta_deb_v' ile başlıyor.
             const matchArtifact = artifacts.data.artifacts.find(artifact => artifact.name.startsWith("SCInsta_deb_v")); 
             
             if (!matchArtifact) {
@@ -61,8 +61,8 @@ jobs:
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/deb_artifact.zip`, Buffer.from(download.data));
           
           env:
-            DEB_REPO_SLUG: "LilCiro/scinsta-repo" # Kendi kullanıcı adın/depo adın
-            DEB_REPO_BRANCH: "gh-pages" # GitHub Pages için genellikle 'gh-pages' branch'i kullanılır
+            DEB_REPO_SLUG: "LilCiro/scinsta-repo" # Senin depo adın: LilCiro/scinsta-repo
+            DEB_REPO_BRANCH: "gh-pages" # GitHub Pages için genellikle bu kullanılır
 
       - name: İndirilen Artifact'ı Çıkar 📦
         run: |
@@ -81,7 +81,7 @@ jobs:
         with:
           repository: ${{ env.DEB_REPO_SLUG }}
           ref: ${{ env.DEB_REPO_BRANCH }}
-          token: ${{ secrets.DEB_REPO_TOKEN }}
+          token: ${{ secrets.DEB_REPO_TOKEN }} # Secret adı: DEB_REPO_TOKEN
           path: deb_repo
 
       - name: Yeni DEB Paketini Ekle ve Depoyu Güncelle ✨
@@ -95,7 +95,7 @@ jobs:
           gzip -c Packages > Packages.gz || { echo "Hata: Packages.gz sıkıştırılamadı."; exit 1; }
 
           # Release dosyasını oluşturan ve güncelleyen kısım
-          { # Bu süslü parantez bloğu, tüm echo komutlarının tek bir shell komutu gibi çalışmasını sağlar
+          {
             echo "Origin: SCInsta Tweak Deposu"
             echo "Label: SCInsta"
             echo "Suite: stable"
@@ -113,7 +113,7 @@ jobs:
             echo "SHA256:"
             sha256sum Packages | awk '{print " " $1 " Packages"}'
             sha256sum Packages.gz | awk '{print " " $1 " Packages"}'
-          } > Release # Tüm bu çıktıyı Release dosyasına yönlendir
+          } > Release
 
       - name: Değişiklikleri Commit Et ve Push Et 📤
         working-directory: deb_repo
