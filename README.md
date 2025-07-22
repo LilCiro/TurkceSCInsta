@@ -7,6 +7,7 @@ iOS için Instagram’a özel, çok sayıda özellik içeren bir tweak!
 
 > \[!NOT]
 > ⚙️  SCInsta ayarlarını değiştirmek için [bu sayfaya](https://github.com/LilCiro/TurkceSCInsta/wiki/SCInsta-Ayarlar%C4%B1n%C4%B1-De%C4%9Fi%C5%9Ftirme) göz atabilirsin
+
 > 🐛  Sizce Türkçede hata manasızlık anlamsızlık ingilizce yerler ve benzeri şeyler için [buraya tıklayın](https://github.com/LilCiro/TurkceSCInsta/issues)
 
 ---
