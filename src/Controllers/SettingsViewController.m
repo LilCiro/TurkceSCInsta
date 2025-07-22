@@ -1,4 +1,7 @@
-// Tweak settings
+// Tweak ayarları
+
+@implementation SettingsViewController
+
 - (NSArray *)specifiers {
     if (!_specifiers) {        
         _specifiers = [NSMutableArray arrayWithArray:@[
@@ -76,11 +79,11 @@
             [self newSwitchCellWithTitle:@"FLEX Hareketini Etkinleştir 🤚" detailTitle:@"Ekrana 5 parmakla basarak FLEX gezginini açmanızı sağlar 🔍" key:@"flex_instagram" changeAction:@selector(FLEXAction:)],
 
             // Bölüm 10: Katkıda Bulunanlar
-[self newSectionWithTitle:@"Katkıda Bulunanlar" footer:[NSString stringWithFormat:@"SCInsta %@\n\nInstagram v%@", SCIVersionString, [SCIUtils IGVersionString]]],
-[self newLinkCellWithTitle:@"Geliştirici" detailTitle:@"SoCuul" url:@"https://socuul.dev" iconURL:@"https://i.imgur.com/WSFMSok.png" iconTransparentBG:NO],
-[self newLinkCellWithTitle:@"Çevirmen" detailTitle:@"LilCiro" url:@"https://github.com/LilCiro" iconURL:@"https://i.imgur.com/WSFMSok.png" iconTransparentBG:NO],
-[self newLinkCellWithTitle:@"Repoyu Görüntüle" detailTitle:@"Fork edilmiş tweakin kaynak kodunu GitHub'da görüntüle" url:@"https://github.com/LilCiro" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES],
-[self newLinkCellWithTitle:@"Orijinal Repoyu Görüntüle" detailTitle:@"Orijinal tweakin kaynak kodunu GitHub'da görüntüle" url:@"https://github.com/SoCuul/SCInsta" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES]
+            [self newSectionWithTitle:@"Katkıda Bulunanlar" footer:[NSString stringWithFormat:@"SCInsta %@\n\nInstagram v%@", SCIVersionString, [SCIUtils IGVersionString]]],
+            [self newLinkCellWithTitle:@"Geliştirici" detailTitle:@"SoCuul" url:@"https://socuul.dev" iconURL:@"https://i.imgur.com/WSFMSok.png" iconTransparentBG:NO],
+            [self newLinkCellWithTitle:@"Çevirmen" detailTitle:@"LilCiro" url:@"https://github.com/LilCiro" iconURL:@"https://i.imgur.com/WSFMSok.png" iconTransparentBG:NO],
+            [self newLinkCellWithTitle:@"Repoyu Görüntüle" detailTitle:@"Fork edilmiş tweakin kaynak kodunu GitHub'da görüntüle" url:@"https://github.com/LilCiro" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES],
+            [self newLinkCellWithTitle:@"Orijinal Repoyu Görüntüle" detailTitle:@"Orijinal tweakin kaynak kodunu GitHub'da görüntüle" url:@"https://github.com/SoCuul/SCInsta" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES]
         ]];
         
         [self collectDynamicSpecifiersFromArray:_specifiers];
@@ -88,3 +91,5 @@
     
     return _specifiers;
 }
+
+@end
