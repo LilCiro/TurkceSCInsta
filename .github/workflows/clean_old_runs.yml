@@ -4,9 +4,9 @@ on:
   workflow_dispatch: # Bu iş akışını manuel olarak tetiklemeye izin verir
     inputs:
       days_to_keep:
-        description: 'Kaç gün öncesine kadar çalıştırmaları saklamak istersiniz? (Varsayılan: 7 gün)'
+        description: 'Kaç gün öncesine kadar çalıştırmaları saklamak istersiniz? (Varsayılan: 0 gün)'
         required: false
-        default: '7'
+        default: '0'
         type: string
       dry_run:
         description: 'Sadece silecekleri listele (silme işlemi yapma)? (true/false)'
