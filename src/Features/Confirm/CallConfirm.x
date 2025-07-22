@@ -16,7 +16,7 @@
 // Görüntülü Arama
 - (void)_didTapVideoButton:(id)arg1 {
     if ([SCIManager getBoolPref:@"call_confirm"]) {
-        NSLog(@"[SCInsta] Çağrı onayı tetiklendi. 📞"); // Güncellendi
+        NSLog(@"[SCInsta] Çağrı onayı. 📞"); // Güncellendi
         
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
