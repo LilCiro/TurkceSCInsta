@@ -6,11 +6,8 @@ iOS için Instagram’a özel, çok sayıda özellik içeren bir tweak!
 ---
 
 > \[!NOT]
-> ⚙️  SCInsta ayarlarını değiştirmek için [bu sayfaya](https://github.com/SoCuul/SCInsta/wiki/Modify-Settings) göz atabilirsin
-> ❓  Herhangi bir sorunuz veya yardıma ihtiyacınız varsa [Tartışmalar](https://github.com/SoCuul/SCInsta/discussions) sekmesini ziyaret edin
->
-> ✨  Özellik öneriniz varsa [buraya tıklayın](https://github.com/SoCuul/SCInsta/issues/new/choose)
-> 🐛  Hata bildirimi yapmak için [buraya tıklayın](https://github.com/SoCuul/SCInsta/issues/new/choose)
+> ⚙️  SCInsta ayarlarını değiştirmek için [bu sayfaya](https://github.com/LilCiro/TurkceSCInsta/wiki/SCInsta-Ayarlar%C4%B1n%C4%B1-De%C4%9Fi%C5%9Ftirme) göz atabilirsin
+> 🐛  Sizce Türkçede hata manasızlık anlamsızlık ingilizce yerler ve benzeri şeyler için [buraya tıklayın](https://github.com/LilCiro/TurkceSCInsta/issues)
 
 ---
 
@@ -19,8 +16,8 @@ iOS için Instagram’a özel, çok sayıda özellik içeren bir tweak!
 > \[!ÖNEMLİ]
 > Bu tweak’i hangi tür cihazda kullanmayı planlıyorsunuz?
 >
-> * Jailbreak’li veya TrollStore’lu cihaz -> [Hazır paketli tweak’i indir](https://github.com/SoCuul/SCInsta/releases/latest)
-> * Standart iOS cihaz -> [IPA dosyası oluşturma rehberine](https://github.com/SoCuul/SCInsta/wiki/Building-IPA) göz atın
+> * Jailbreak’li veya TrollStore’lu cihaz -> [Hazır paketli tweak’i indir](https://github.com/LilCiro/TurkceSCInsta/releases/latest)
+> * Standart iOS cihaz -> [IPA dosyası oluşturma rehberine](https://github.com/LilCiro/TurkceSCInsta/wiki/IPA-Yapmak) göz atın
 
 # Özellikler
 
@@ -90,7 +87,7 @@ iOS için Instagram’a özel, çok sayıda özellik içeren bir tweak!
 
 ### Dahili Tweak Ayarları
 
-[SCInsta ayarları nasıl değiştirilir?](https://github.com/SoCuul/SCInsta/wiki/Modify-Settings)
+[SCInsta ayarları nasıl değiştirilir?]([https://github.com/SoCuul/SCInsta/wiki/Modify-Settings](https://github.com/LilCiro/TurkceSCInsta/wiki/SCInsta-Ayarlar%C4%B1n%C4%B1-De%C4%9Fi%C5%9Ftirme))
 
 # Uygulama içi ekran görüntüleri
 
