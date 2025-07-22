@@ -4,25 +4,25 @@
 
 ////////////////////////////////////////////////////////
 
-#define CONFIRMFOLLOW(orig)                            \
-    if ([SCIManager getBoolPref:@"follow_confirm"]) {             \
-        NSLog(@"[SCInsta] Confirm follow triggered");  \
-                                                       \
-        [SCIUtils showConfirmation:^(void) { orig; }]; \
-    }                                                  \
-    else {                                             \
-        return orig;                                   \
-    }                                                  \
+#define CONFIRMFOLLOW(orig)                                                      \
+    if ([SCIManager getBoolPref:@"follow_confirm"]) {                            \
+        NSLog(@"[SCInsta] Takip onayı tetiklendi. 🤝✅🔒❗"); \
+                                                                                 \
+        [SCIUtils showConfirmation:^(void) { orig; }];                           \
+    }                                                                            \
+    else {                                                                       \
+        return orig;                                                             \
+    }                                                                            \
 
 ////////////////////////////////////////////////////////
 
-// Follow button on profile page
+// Profil sayfasındaki takip butonu
 %hook IGFollowController
 - (void)_didPressFollowButton {
-    // Get user follow status (check if already following user)
+    // Kullanıcının takip durumunu al (kullanıcıyı zaten takip edip etmediğini kontrol et)
     NSInteger UserFollowStatus = self.user.followStatus;
 
-    // Only show confirm dialog if user is not following
+    // Sadece kullanıcı takip etmiyorsa onay iletişim kutusunu göster
     if (UserFollowStatus == 2) {
         CONFIRMFOLLOW(%orig);
     }
@@ -32,7 +32,7 @@
 }
 %end
 
-// Follow button on discover people page
+// Keşfet sayfasındaki takip butonu
 %hook IGDiscoverPeopleButtonGroupView
 - (void)_onFollowButtonTapped:(id)arg1 {
     CONFIRMFOLLOW(%orig);
@@ -42,7 +42,7 @@
 }
 %end
 
-// Suggested for you (home feed & profile) follow button
+// Sizin için önerilenler (ana akış ve profil) takip butonu
 %hook IGHScrollAYMFCell
 - (void)_didTapAYMFActionButton {
     CONFIRMFOLLOW(%orig);
@@ -54,21 +54,21 @@
 }
 %end
 
-// Follow button on reels
+// Reels'taki takip butonu
 %hook IGUnifiedVideoFollowButton
 - (void)_hackilyHandleOurOwnButtonTaps:(id)arg1 event:(id)arg2 {
     CONFIRMFOLLOW(%orig);
 }
 %end
 
-// Follow text on profile (when collapsed into top bar) 
+// Profildeki takip yazısı (üst çubuğa daraldığında)
 %hook IGProfileViewController
 - (void)navigationItemsControllerDidTapHeaderFollowButton:(id)arg1 {
     CONFIRMFOLLOW(%orig);
 }
 %end
 
-// Follow button on suggested friends (in story section)
+// Hikaye bölümündeki önerilen arkadaşlar takip butonu
 %hook IGStorySectionController
 - (void)followButtonTapped:(id)arg1 cell:(id)arg2 {
     CONFIRMFOLLOW(%orig);
