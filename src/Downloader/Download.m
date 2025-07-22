@@ -4,7 +4,7 @@
 
 - (instancetype)initWithAction:(DownloadAction)action showProgress:(BOOL)showProgress {
     self = [super init];
-    
+
     if (self) {
         // Salt okunur özellikler
         _action = action;
@@ -17,6 +17,7 @@
 
     return self;
 }
+
 - (void)downloadFileWithURL:(NSURL *)url fileExtension:(NSString *)fileExtension hudLabel:(NSString *)hudLabel {
     // İlerleme arayüzünü göster
     self.hud = [[JGProgressHUD alloc] init];
@@ -39,7 +40,8 @@
 
     [self.hud showInView:topMostController().view];
 
-    NSLog(@"[SCInsta] İndirme: \"%@\" URL'sinden \".%@\" dosya uzantısıyla indirme başlatılacak. 🚀📥🌐🔗"); // Burası güncellendi
+    // Düzeltildi: URL ve dosya uzantısı için argümanlar eklendi
+    NSLog(@"[SCInsta] İndirme: \"%@\" URL'sinden \".%@\" dosya uzantısıyla indirme başlatılacak. 🚀📥🌐🔗", url.absoluteString, fileExtension);
 
     // Yöneticiyi kullanarak indirmeyi başlat
     [self.downloadManager downloadFileWithURL:url fileExtension:fileExtension];
@@ -49,14 +51,16 @@
 - (void)downloadDidStart {
     NSLog(@"[SCInsta] İndirme: İndirme başladı. ▶️⏳📊⬇️"); // Burası güncellendi
 }
+
 - (void)downloadDidCancel {
     [self.hud dismiss];
 
     NSLog(@"[SCInsta] İndirme: İndirme iptal edildi. ❌🚫🛑🔚"); // Burası güncellendi
 }
+
 - (void)downloadDidProgress:(float)progress {
     NSLog(@"[SCInsta] İndirme: İndirme ilerlemesi: %f 📊📈🔄⬇️", progress); // Burası güncellendi
-    
+
     if (self.showProgress) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.hud setProgress:progress animated:false];
@@ -64,27 +68,31 @@
         });
     }
 }
+
 - (void)downloadDidFinishWithError:(NSError *)error {
     dispatch_async(dispatch_get_main_queue(), ^{
         // Gerçekten hata olup olmadığını kontrol et (iptal edilmemişse)
         if (error && error.code != NSURLErrorCancelled) {
-            NSLog(@"[SCInsta] İndirme: \"%@\" hatasıyla indirme başarısız oldu. 🚫🚨❌🐞"); // Burası güncellendi
+            // Düzeltildi: Hata açıklaması için argüman eklendi
+            NSLog(@"[SCInsta] İndirme: \"%@\" hatasıyla indirme başarısız oldu. 🚫🚨❌🐞", error.localizedDescription);
             [SCIUtils showErrorHUDWithDescription:@"Hata oluştu, lütfen daha sonra tekrar deneyin ⚠️"]; // Burası güncellendi
         }
     });
 }
+
 - (void)downloadDidFinishWithFileURL:(NSURL *)fileURL {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.hud dismiss];
 
-        NSLog(@"[SCInsta] İndirme: \"%@\" URL'si ile indirme tamamlandı. ✨🎉💾💯"); // Burası güncellendi
+        // Düzeltildi: fileURL için argüman eklendi (eski 80. satırdaki sorun buydu)
+        NSLog(@"[SCInsta] İndirme: \"%@\" URL'si ile indirme tamamlandı. ✨🎉💾💯", fileURL.absoluteString);
         NSLog(@"[SCInsta] İndirme: %d eylemiyle tamamlandı. 🎉✅📂👍", (int)self.action); // Burası güncellendi
 
         switch (self.action) {
             case share:
                 [SCIManager showShareVC:fileURL];
                 break;
-            
+
             case quickLook:
                 [SCIManager showQuickLookVC:@[fileURL]];
                 break;
