@@ -87,7 +87,7 @@ iOS için Instagram’a özel, çok sayıda özellik içeren bir tweak!
 
 ### Dahili Tweak Ayarları
 
-[SCInsta ayarları nasıl değiştirilir?]([https://github.com/SoCuul/SCInsta/wiki/Modify-Settings](https://github.com/LilCiro/TurkceSCInsta/wiki/SCInsta-Ayarlar%C4%B1n%C4%B1-De%C4%9Fi%C5%9Ftirme))
+[TürkçeSCInsta ayarlarını değiştirmek [bu sayfaya](https://github.com/LilCiro/TurkceSCInsta/wiki/SCInsta-Ayarlar%C4%B1n%C4%B1-De%C4%9Fi%C5%9Ftirme) göz atabilirsin 
 
 # Uygulama içi ekran görüntüleri
 
