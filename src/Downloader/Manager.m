@@ -4,7 +4,7 @@
 
 - (instancetype)initWithDelegate:(id<SCIDownloadDelegateProtocol>)downloadDelegate {
     self = [super init];
-    
+
     if (self) {
         self.delegate = downloadDelegate;
     }
@@ -16,7 +16,7 @@
     // Özellikler
     self.session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:self delegateQueue:nil];
     self.task = [self.session downloadTaskWithURL:url];
-    
+
     // Geçerli bir uzantı sağlanmazsa varsayılan olarak jpg kullanılır
     self.fileExtension = [fileExtension length] >= 3 ? fileExtension : @"jpg";
 
@@ -31,23 +31,26 @@
 
 // URLSession metotları
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
-    NSLog(@"Görev %lld bayttan %lld bayt yazdı. 📦⬇️📊⚙️"); 
-    
+    // Düzeltildi: Argümanlar eklendi
+    NSLog(@"Görev %lld bayttan %lld bayt yazdı. 📦⬇️📊⚙️", totalBytesWritten, totalBytesExpectedToWrite);
+
     float progress = (float)totalBytesWritten / (float)totalBytesExpectedToWrite;
 
     [self.delegate downloadDidProgress:progress];
 }
 
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {    
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
     // İndirilen dosyayı önbellek dizinine taşı
     NSURL *finalLocation = [self moveFileToCacheDir:location];
 
     [self.delegate downloadDidFinishWithFileURL:finalLocation];
 }
 
-- (void)URLSession:(NSURLSessionSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-    NSLog(@"Görev şu hatayla tamamlandı: %@ 🛑❌🚨🐞"); 
-    
+// Düzeltildi: NSURLSessionSession yerine NSURLSession yazıldı ve argüman eklendi
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
+    // Düzeltildi: Argüman eklendi
+    NSLog(@"Görev şu hatayla tamamlandı: %@ 🛑❌🚨🐞", error.localizedDescription);
+
     [self.delegate downloadDidFinishWithError:error];
 }
 
@@ -57,16 +60,19 @@
 
     NSString *cacheDirectoryPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
     NSURL *newPath = [[NSURL fileURLWithPath:cacheDirectoryPath] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", NSUUID.UUID.UUIDString, self.fileExtension]];
-    
-    NSLog(@"[SCInsta] İndirme Yöneticisi: Dosya şuradan taşınıyor: %@ şuraya: %@ 🚚📂➡️💾"); 
+
+    // Düzeltildi: Argümanlar eklendi
+    NSLog(@"[SCInsta] İndirme Yöneticisi: Dosya şuradan taşınıyor: %@ şuraya: %@ 🚚📂➡️💾", oldPath.lastPathComponent, newPath.lastPathComponent);
 
     // Dosyayı önbellek dizinine taşı
     NSError *fileMoveError;
     [fileManager moveItemAtURL:oldPath toURL:newPath error:&fileMoveError];
 
     if (fileMoveError) {
-        NSLog(@"[SCInsta] İndirme Yöneticisi: Dosya taşınırken hata oluştu: %@ ⚠️❌🐞🚨"); 
-        NSLog(@"[SCInsta] İndirme Yöneticisi: %@ 🐛🚫❓❗"); 
+        // Düzeltildi: Argüman eklendi
+        NSLog(@"[SCInsta] İndirme Yöneticisi: Dosya taşınırken hata oluştu: %@ ⚠️❌🐞🚨", fileMoveError.localizedDescription);
+        // Düzeltildi: Argüman eklendi (eski 69. satırdaki sorun buydu)
+        NSLog(@"[SCInsta] İndirme Yöneticisi: %@ 🐛🚫❓❗", fileMoveError.localizedDescription);
     }
 
     return newPath;
