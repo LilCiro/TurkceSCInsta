@@ -1,9 +1,7 @@
-// Tweak ayarları
-
 @implementation SettingsViewController
 
 - (NSArray *)specifiers {
-    if (!_specifiers) {        
+    if (!_specifiers) {
         _specifiers = [NSMutableArray arrayWithArray:@[
             [self newLinkCellWithTitle:@"Bağış Yap 💖" detailTitle:@"Bu tweak'i desteklemek için bağış yapmayı düşünün <3" url:@"https://ko-fi.com/socuul" iconURL:@"https://i.imgur.com/g4U5AMi.png" iconTransparentBG:YES],
 
