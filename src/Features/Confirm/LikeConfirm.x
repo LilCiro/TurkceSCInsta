@@ -6,25 +6,23 @@
 
 // Onay işleyiciler
 
-#define CONFIRMPOSTLIKE(orig)                                                      \
-    if ([SCIManager getBoolPref:@"like_confirm"]) {                                \
-        NSLog(@"[SCInsta] Gönderi beğenme onayı. ❤️👍✅🔒"); \
-                                                                                   \
-        [SCIUtils showConfirmation:^(void) { orig; }];                             \
-    }                                                                              \
-    else {                                                                         \
-        return orig;                                                               \
-    }                                                                              \
+#define CONFIRMPOSTLIKE(orig)                                                   \
+    if ([SCIManager getBoolPref:@"like_confirm"]) {                             \
+        NSLog(@"[SCInsta] Gönderi beğenme onayı. ❤️👍✅🔒");                   \
+        [SCIUtils showConfirmation:^(void) { orig; }];                          \
+    }                                                                           \
+    else {                                                                      \
+        return orig;                                                            \
+    }
 
-#define CONFIRMREELSLIKE(orig)                                                     \
-    if ([SCIManager getBoolPref:@"like_confirm_reels"]) {                          \
-        NSLog(@"[SCInsta] Reels beğenme onayı. 🎬❤️✅🔒"); \
-                                                                                   \
-        [SCIUtils showConfirmation:^(void) { orig; }];                             \
-    }                                                                              \
-    else {                                                                         \
-        return orig;                                                               \
-    }                                                                              \
+#define CONFIRMREELSLIKE(orig)                                                  \
+    if ([SCIManager getBoolPref:@"like_confirm_reels"]) {                       \
+        NSLog(@"[SCInsta] Reels beğenme onayı. 🎬❤️✅🔒");                    \
+        [SCIUtils showConfirmation:^(void) { orig; }];                          \
+    }                                                                           \
+    else {                                                                      \
+        return orig;                                                            \
+    }
 
 ///////////////////////////////////////////////////////////
 
@@ -74,7 +72,7 @@
 - (void)controlsOverlayControllerDidTapLikeButton:(id)arg1 {
     CONFIRMREELSLIKE(%orig);
 }
-- (void)gestureController:(id)arg1 didObserveDoubleTap:(id)arg1 {
+- (void)gestureController:(id)arg1 didObserveDoubleTap:(id)arg2 { // BURASI DÜZELTİLDİ! arg1 -> arg2
     CONFIRMREELSLIKE(%orig);
 }
 %end
