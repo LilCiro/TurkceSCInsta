@@ -14,7 +14,7 @@
 }
 - (void)themePickerSectionController:(id)arg1 didSelectThemeId:(id)arg2 {
     if ([SCIManager getBoolPref:@"change_direct_theme_confirm"]) {
-        NSLog(@"[SCInsta] Doğrudan tema değişikliği onayı tetiklendi. 🎨"); // Güncellendi
+        NSLog(@"[SCInsta] Doğrudan tema değişikliği onayı. 🎨"); // Güncellendi
 
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
