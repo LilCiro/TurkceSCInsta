@@ -46,7 +46,7 @@ concurrency: # Aynı anda birden fazla çalıştırmanın nasıl yönetileceğin
 jobs:
   build: # Derleme işi. 🏗️💻🍏📦
     name: SCInsta'yı Derle 🚀✨✅🛠️
-    runs-on: macos-latest # İşin en son macOS sürümünde çalışacağını belirtir. 🍎💻
+    runs-on: ubuntu-latest # Önceki hataları çözmek için macOS yerine Ubuntu'ya geçiş yapıldı. 🐧💻
     permissions: # İşin sahip olduğu izinler. 🔑🔒
       contents: write # Depo içeriğine yazma izni verir. ✍️
 
@@ -57,56 +57,66 @@ jobs:
           path: main # Depoyu 'main' dizinine çeker.
           submodules: recursive # Alt modülleri de özyinelemeli olarak çeker.
 
-      - name: Bağımlılıkları Yükle 📦🔧⚙️📚
-        run: brew install ldid dpkg make # Gerekli araçları (ldid, dpkg, make) Homebrew ile yükler.
-
-      - name: PATH Ortam Değişkenini Ayarla 🛣️🌍⚙️➡️
-        run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH # 'make' komutunun doğru sürümünü PATH'e ekler.
-
-      - name: Theos'u Kur 🍏🛠️⚙️🚀
+      - name: Theos'u Kur ve PATH'ı Ayarla 🍏🛠️⚙️🚀
         uses: actions/checkout@v4 # Theos deposunu çekmek için checkout eylemini kullanır.
         with:
           repository: theos/theos # Theos'un GitHub deposu.
           ref: master # Master branch'ini çeker.
           path: ${{ github.workspace }}/theos # Theos'u çalışma alanındaki 'theos' dizinine çeker.
           submodules: recursive # Theos'un alt modüllerini de özyinelemeli olarak çeker.
-            
-      - name: SDK Önbellekleme 💾⚡️📥🔄
-        id: SDK # Bu adım için bir ID belirler.
-        uses: actions/cache@v4 # Önbellekleme eylemini kullanır.
-        env:
-          cache-name: iPhoneOS14.5.sdk # Önbellek adı.
-        with:
-          path: ${{ github.workspace }}/theos/sdks/ # Önbelleğe alınacak dizin.
-          key: ${{ env.cache-name }} # Önbellek anahtarı.
-          restore-keys: ${{ env.cache-name }} # Geri yüklenecek anahtarlar.
+        # THEOS ortam değişkenini ayarla
+        run: echo "THEOS=${{ github.workspace }}/theos" >> $GITHUB_ENV
 
-      - name: iOS SDK İndir ⬇️📱🌐📦
-        if: steps.SDK.outputs.cache-hit != 'true' # Eğer SDK önbellekte yoksa çalışır.
+      - name: SDK Önbellekleme 💾⚡️📥🔄
+        id: SDK_Cache # Bu adım için bir ID belirler.
+        uses: actions/cache@v4 # Önbellekleme eylemini kullanır.
+        with:
+          path: ${{ github.workspace }}/theos/sdks/iPhoneOS14.5.sdk # Önbelleğe alınacak dizin (SDK'nın kendisi).
+          key: ${{ runner.os }}-sdk-iPhoneOS14.5.sdk-v1 # Önbellek anahtarı.
+          restore-keys: ${{ runner.os }}-sdk-iPhoneOS14.5.sdk- # Geri yüklenecek anahtarlar (SDK'nın güncel sürümünü yakalamak için).
+
+      - name: iOS SDK İndir (Önbellekte Yoksa) ⬇️📱🌐📦
+        if: steps.SDK_Cache.outputs.cache-hit != 'true' # Eğer SDK önbellekte yoksa çalışır.
         run: |
-          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/xybp888/iOS-SDKs/ # iOS SDK'larını içeren depoyu klonlar.
-          cd iOS-SDKs # Dizin değiştirir.
-          git sparse-checkout set --no-cone iPhoneOS14.5.sdk # Sadece belirtilen SDK'yı çeker.
-          git checkout # Çekilen SDK'yı etkinleştirir.
-          mv *.sdk $THEOS/sdks # SDK'yı Theos'un SDK dizinine taşır.
+          echo "iPhoneOS14.5.sdk indiriliyor ve theos/sdks içine yerleştiriliyor..."
+          mkdir -p ${{ github.workspace }}/theos/sdks # SDK dizininin var olduğundan emin ol.
+          # GitHub release veya başka bir güvenilir kaynaktan SDK'yı indirme
+          # **ÖNEMLİ: Bu URL'yi gerçek, geçerli bir SDK indirme URL'si ile değiştirmeniz gerekir.**
+          # Genellikle bu SDK'lar doğrudan bir git deposunda olmaz, release varlıklarıdır.
+          wget -q https://github.com/xybp888/iOS-SDKs/releases/download/v14.5/iPhoneOS14.5.sdk.zip -O iPhoneOS14.5.sdk.zip || { echo "SDK indirme hatası!"; exit 1; }
+          unzip -q iPhoneOS14.5.sdk.zip -d ${{ github.workspace }}/theos/sdks/ || { echo "SDK açma hatası!"; exit 1; }
+          rm iPhoneOS14.5.sdk.zip # İndirilen zip dosyasını temizle
+          echo "iPhoneOS14.5.sdk başarıyla indirildi ve yerleştirildi."
         env:
           THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
 
-      - name: Instagram IPA'yı Hazırla 📱📦🔗📥
+      - name: Bağımlılıkları Yükle 📦🔧⚙️📚
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ldid unzip build-essential fakeroot # dpkg'ye ihtiyacımız olursa diye fakeroot eklendi
+          # make (GNU Make) Ubuntu'da varsayılan olarak zaten 'make' adıyla kuruludur.
+          echo "Bağımlılıklar yüklendi."
+          
+      - name: Instagram IPA'yı İndir ve Hazırla 📱📦🔗📥
         run: |
           cd main # Ana depo dizinine gider.
           mkdir -p packages # 'packages' dizini oluşturur.
-          wget "$Instagram_URL" --no-verbose -O packages/com.burbn.instagram.ipa # Belirtilen URL'den Instagram IPA'sını indirir.
+          echo "Instagram IPA'sı indiriliyor: ${{ inputs.decrypted_instagram_url }}"
+          wget "${{ inputs.decrypted_instagram_url }}" --no-verbose -O packages/com.burbn.instagram.ipa || { echo "Instagram IPA indirme hatası!"; exit 1; }
           ls -la packages # 'packages' dizininin içeriğini listeler.
+          # İndirilen IPA'nın varlığını kontrol et
+          if [ ! -f "packages/com.burbn.instagram.ipa" ]; then
+            echo "Hata: packages/com.burbn.instagram.ipa indirilemedi veya bulunamadı!"
+            exit 1
+          fi
+          echo "Instagram IPA başarıyla indirildi ve doğrulandı."
             
         env:
           THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
-          Instagram_URL: ${{ inputs.decrypted_instagram_url }} # Girişlerden alınan Instagram URL'sini kullanır.
 
       - name: SCInsta Tweak Sürümünü Al 🏷️🔢✨📄
         id: scinsta_version # Bu adım için bir ID belirler.
         run: |
-          # SCInsta tweak sürümü control dosyasından alınır ve değiştirilemez.
           SCINSTA_TWEAK_VERSION=$(awk '/Version:/ {print $2}' main/control)
           echo "SCInsta tweak sürümü control dosyasından alındı: ${SCINSTA_TWEAK_VERSION}"
           echo "SCINSTA_TWEAK_VERSION=${SCINSTA_TWEAK_VERSION}" >> "$GITHUB_ENV" # Ortam değişkeni olarak ayarla
@@ -114,9 +124,11 @@ jobs:
 
       - name: SCInsta tweak'i sideload için derle (IPA olarak) 🏗️📱🚀📦
         run: |
-          pip install --force-reinstall https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip # pyzule-rw paketini yükler.
-          
+          # pyzule-rw Ubuntu'da da çalışır.
+          pip install --force-reinstall https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip || { echo "pyzule-rw kurulum hatası!"; exit 1; }
+            
           cd main # Ana depo dizinine gider.
+          echo "main dizini içeriği:"
           ls -la # Dizin içeriğini listeler.
 
           # Uygulama adı, geliştirici adı, ikon kaldırma ve Instagram sürüm argümanlarını hazırla
@@ -130,33 +142,54 @@ jobs:
           if [[ "${{ inputs.remove_app_icon }}" == "true" ]]; then
             BUILD_SCRIPT_ARGS+=" --remove-app-icon"
           fi
-          # Instagram uygulama sürümünü build.sh'ye argüman olarak ilet
           if [[ -n "${{ inputs.instagram_app_version }}" ]]; then
             BUILD_SCRIPT_ARGS+=" --instagram-sürümü \"${{ inputs.instagram_app_version }}\""
           fi
 
-          ./build.sh $BUILD_SCRIPT_ARGS # Hazırlanan argümanlarla derleme betiğini çalıştırır.
+          echo "build.sh çalıştırılıyor: ./build.sh $BUILD_SCRIPT_ARGS"
+          bash ./build.sh $BUILD_SCRIPT_ARGS || { echo "build.sh çalıştırılırken hata oluştu!"; exit 1; }
 
+          echo "packages/ dizini içeriği (derleme sonrası):"
           ls -la packages # 'packages' dizininin içeriğini listeler.
             
         env:
-          THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
+          # THEOS ve THEOS_SDK_PATH artık burada doğrudan kullanılıyor
+          THEOS: ${{ github.workspace }}/theos
+          THEOS_SDK_PATH: ${{ github.workspace }}/theos/sdks/iPhoneOS14.5.sdk
 
       - name: IPA'yı sürüm bilgisiyle yeniden adlandır 🏷️🔄📦✨
         run: |
           cd main/packages # 'packages' dizinine gider.
           # SCINSTA_TWEAK_VERSION env değişkeni bu adımda kullanılabilir.
-          mv "$(ls -t | head -n1)" "SCInsta_sideloaded_v${SCINSTA_TWEAK_VERSION}.ipa" # En son oluşturulan IPA dosyasını SCInsta tweak sürüm bilgisiyle yeniden adlandırır.
+          # En son oluşturulan .ipa dosyasını bulmak için dikkatli olun
+          IPA_FILE=$(find . -maxdepth 1 -name "*.ipa" -print -quit)
+          if [ -z "$IPA_FILE" ]; then
+            echo "Hata: packages/ dizininde IPA dosyası bulunamadı!"
+            exit 1
+          fi
+          mv "$IPA_FILE" "SCInsta_sideloaded_v${SCINSTA_TWEAK_VERSION}.ipa" || { echo "IPA yeniden adlandırma hatası!"; exit 1; }
+          echo "IPA başarıyla yeniden adlandırıldı: SCInsta_sideloaded_v${SCINSTA_TWEAK_VERSION}.ipa"
+          ls -la # Yeniden adlandırma sonrası dizin içeriğini listeler.
+
+        env:
+          SCINSTA_TWEAK_VERSION: ${{ env.SCINSTA_TWEAK_VERSION }} # scinsta_version adımından gelen env değişkenini kullan
 
       - name: Paket adını yükleme eylemine ilet 📤📂➡️🔗
         id: package_name # Bu adım için bir ID belirler.
         run: |
-          echo "package=$(ls -t main/packages | head -n1)" >> "$GITHUB_OUTPUT" # En son paketin adını çıktı olarak ayarlar.
+          # Yeniden adlandırılan IPA dosyasının adını bulmak için
+          RENAMED_IPA=$(find main/packages -maxdepth 1 -name "*.ipa" -print -quit)
+          if [ -z "$RENAMED_IPA" ]; then
+            echo "Hata: Yeniden adlandırılan IPA dosyası bulunamadı!"
+            exit 1
+          fi
+          echo "package=$(basename "$RENAMED_IPA")" >> "$GITHUB_OUTPUT" # En son paketin adını çıktı olarak ayarlar.
 
       - name: Artifact Yükle ⬆️📦☁️✅
         if: ${{ inputs.upload_artifact }} # Eğer 'upload_artifact' girişi doğru ise çalışır.
         uses: actions/upload-artifact@v4 # Artifact yükleme eylemini kullanır.
         with:
           name: SCInsta_sideloaded_v${{ steps.scinsta_version.outputs.version }} # Yüklenecek artifact'in adı.
-          path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }} # Yüklenecek dosyanın yolu.
+          # Yükleme için tam yolu kullan
+          path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }} 
           if-no-files-found: error # Dosya bulunamazsa hata verir.
