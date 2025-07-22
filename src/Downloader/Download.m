@@ -6,11 +6,11 @@
     self = [super init];
     
     if (self) {
-        // Read-only properties
+        // Salt okunur özellikler
         _action = action;
         _showProgress = showProgress;
 
-        // Properties
+        // Özellikler
         self.downloadManager = [[SCIDownloadManager alloc] initWithDelegate:self];
         self.hud = [[JGProgressHUD alloc] init];
     }
@@ -18,7 +18,7 @@
     return self;
 }
 - (void)downloadFileWithURL:(NSURL *)url fileExtension:(NSString *)fileExtension hudLabel:(NSString *)hudLabel {
-    // Show progress gui
+    // İlerleme arayüzünü göster
     self.hud = [[JGProgressHUD alloc] init];
     self.hud.textLabel.text = hudLabel != nil ? hudLabel : @"İndiriliyor... ⬇️"; // Burası güncellendi
 
@@ -30,7 +30,7 @@
         self.hud.indicatorView = indicatorView;
         self.hud.detailTextLabel.text = [NSString stringWithFormat:@"00%% Tamamlandı ✅"]; // Burası güncellendi
 
-        // Allow dismissing longer downloads (requiring progress updates)
+        // Uzun süreli indirmelerin (ilerleme güncellemeleri gerektiren) kapatılmasına izin ver
         __weak typeof(self) weakSelf = self;
         self.hud.tapOutsideBlock = ^(JGProgressHUD * _Nonnull HUD) {
             [weakSelf.downloadManager cancelDownload];
@@ -39,23 +39,23 @@
 
     [self.hud showInView:topMostController().view];
 
-    NSLog(@"[SCInsta] İndirme: \"%@\" URL'sinden \".%@\" dosya uzantısıyla indirme başlatılacak. 🚀", url, fileExtension); // Burası güncellendi
+    NSLog(@"[SCInsta] İndirme: \"%@\" URL'sinden \".%@\" dosya uzantısıyla indirme başlatılacak. 🚀📥🌐🔗"); // Burası güncellendi
 
-    // Start download using manager
+    // Yöneticiyi kullanarak indirmeyi başlat
     [self.downloadManager downloadFileWithURL:url fileExtension:fileExtension];
 }
 
-// Delegate methods
+// Delege metotları
 - (void)downloadDidStart {
-    NSLog(@"[SCInsta] İndirme: İndirme başladı. ▶️"); // Burası güncellendi
+    NSLog(@"[SCInsta] İndirme: İndirme başladı. ▶️⏳📊⬇️"); // Burası güncellendi
 }
 - (void)downloadDidCancel {
     [self.hud dismiss];
 
-    NSLog(@"[SCInsta] İndirme: İndirme iptal edildi. ❌"); // Burası güncellendi
+    NSLog(@"[SCInsta] İndirme: İndirme iptal edildi. ❌🚫🛑🔚"); // Burası güncellendi
 }
 - (void)downloadDidProgress:(float)progress {
-    NSLog(@"[SCInsta] İndirme: İndirme ilerlemesi: %f 📊", progress); // Burası güncellendi
+    NSLog(@"[SCInsta] İndirme: İndirme ilerlemesi: %f 📊📈🔄⬇️", progress); // Burası güncellendi
     
     if (self.showProgress) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -66,9 +66,9 @@
 }
 - (void)downloadDidFinishWithError:(NSError *)error {
     dispatch_async(dispatch_get_main_queue(), ^{
-        // Check if it actually errored (not cancelled)
+        // Gerçekten hata olup olmadığını kontrol et (iptal edilmemişse)
         if (error && error.code != NSURLErrorCancelled) {
-            NSLog(@"[SCInsta] İndirme: \"%@\" hatasıyla indirme başarısız oldu. 🚫", error); // Burası güncellendi
+            NSLog(@"[SCInsta] İndirme: \"%@\" hatasıyla indirme başarısız oldu. 🚫🚨❌🐞"); // Burası güncellendi
             [SCIUtils showErrorHUDWithDescription:@"Hata oluştu, lütfen daha sonra tekrar deneyin ⚠️"]; // Burası güncellendi
         }
     });
@@ -77,8 +77,8 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.hud dismiss];
 
-        NSLog(@"[SCInsta] İndirme: \"%@\" URL'si ile indirme tamamlandı. ✨", [fileURL absoluteString]); // Burası güncellendi
-        NSLog(@"[SCInsta] İndirme: %d eylemiyle tamamlandı. 🎉", (int)self.action); // Burası güncellendi
+        NSLog(@"[SCInsta] İndirme: \"%@\" URL'si ile indirme tamamlandı. ✨🎉💾💯"); // Burası güncellendi
+        NSLog(@"[SCInsta] İndirme: %d eylemiyle tamamlandı. 🎉✅📂👍", (int)self.action); // Burası güncellendi
 
         switch (self.action) {
             case share:
