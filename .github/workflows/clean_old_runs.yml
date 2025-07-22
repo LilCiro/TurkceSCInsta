@@ -11,13 +11,17 @@ jobs:
       actions: write # İş akışı çalıştırmalarını silebilmek için bu izne ihtiyaç duyarız
 
     steps:
-      - name: zTüm Eski İş Akışı Çalıştırmalarını Direkt Sil 🔥
-        uses: actions/delete-workflow-runs@v5
+      - name: Tüm Eski İş Akışı Çalıştırmalarını Direkt Sil 🔥
+        # BURAYI DEĞİŞTİRİYORUZ!
+        uses: mikecparr/delete-workflow-runs@v2
         with:
-          # Tüm çalıştırmaları silmek için 'days' parametresini çok düşük bir sayıya ayarlıyoruz.
-          # Ancak aksiyonun doğası gereği, en az bir çalıştırma kalabilir veya yeni
-          # tetiklenen çalıştırma anında silinemeyebilir.
-          days: 1 # 1 günden eski olanları sil (bu pratik olarak tüm geçmişi kapsar)
-          # Hangi iş akışlarını sileceğimizi belirtmezsek, tüm iş akışlarının çalıştırmalarını siler.
-          # Kendisini (bu iş akışını) de silmeye çalışacaktır, ancak çoğu durumda tamamlanmadan silinemez.
+          # mikecparr/delete-workflow-runs@v2 için 'older-than' parametresi kullanılabilir
+          # Bu, belirli bir süreden daha eski olan tüm çalıştırmaları hedefler.
+          # '0' gün belirterek pratik olarak tüm geçmişi hedefleriz.
+          older-than: '0 days'
+          # Ayrıca, silmek istediğiniz belirli iş akışlarının adlarını da listeleyebilirsiniz.
+          # Tüm iş akışlarını silmek için bu parametreyi boş bırakın veya kullanmayın.
+          # workflow: 'Build and Package SCInsta, My Other Workflow' # Örnek: Belirli iş akışları için
+          # min-runs-to-keep: 0 # Her iş akışı için minimum çalıştırma sayısı, 0 tümünü siler
+          # dry-run: true # Gerçekten silmeden önce ne olacağını görmek için 'true' yapın (önerilir!)
           token: ${{ secrets.GITHUB_TOKEN }}
