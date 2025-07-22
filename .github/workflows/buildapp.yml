@@ -23,6 +23,16 @@ on:
         default: ""
         required: false
         type: string
+      scinsta_version: # SCInsta tweak sürüm numarası girişi (opsiyonel). 🔢✨🔄
+        description: "SCInsta Tweak Sürümü (Opsiyonel - Boş bırakılırsa control dosyasından alınır)"
+        default: ""
+        required: false
+        type: string
+      instagram_app_version: # Instagram uygulama sürüm numarası girişi (opsiyonel). 📱🔢✨
+        description: "Instagram Uygulama Sürümü (Opsiyonel - Boş bırakılırsa orijinal IPA'nın sürümü kullanılır)"
+        default: ""
+        required: false
+        type: string
       remove_app_icon: # Uygulama fotoğrafını kaldırma seçeneği (opsiyonel). 🖼️❌🚫
         description: "Uygulama Fotoğrafını Kaldır (Opsiyonel - Seçilirse boş ikonla derlenir)"
         default: false
@@ -98,53 +108,24 @@ jobs:
           THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
           Instagram_URL: ${{ inputs.decrypted_instagram_url }} # Girişlerden alınan Instagram URL'sini kullanır.
 
-      - name: SCInsta Sürümünü Al 🏷️🔢✨📄
-        id: scinsta_version # Bu adım için bir ID belirler.
+      - name: SCInsta ve Instagram Sürümünü Belirle 🏷️🔢✨📄
+        id: versions
         run: |
-          SCINSTA_VERSION=$(awk '/Version:/ {print $2}' main/control) # 'main/control' dosyasından sürüm bilgisini alır.
-          echo "SCINSTA_VERSION=${SCINSTA_VERSION}" >> "$GITHUB_ENV" # Sürümü ortam değişkeni olarak ayarlar.
-          echo "version=${SCINSTA_VERSION}" >> "$GITHUB_OUTPUT" # Sürümü çıktı olarak ayarlar.
-            
-      - name: SCInsta tweak'i sideload için derle (IPA olarak) 🏗️📱🚀📦
-        run: |
-          pip install --force-reinstall https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip # pyzule-rw paketini yükler.
-          
-          cd main # Ana depo dizinine gider.
-          ls -la # Dizin içeriğini listeler.
-
-          # Uygulama adı, geliştirici adı ve ikon kaldırma argümanlarını hazırla
-          BUILD_SCRIPT_ARGS="sideload"
-          if [[ -n "${{ inputs.app_name }}" ]]; then
-            BUILD_SCRIPT_ARGS+=" --uygulama-adi \"${{ inputs.app_name }}\""
+          # SCInsta Tweak Sürümünü Belirle
+          SCINSTA_TWEAK_VERSION=""
+          if [[ -n "${{ inputs.scinsta_version }}" ]]; then
+            SCINSTA_TWEAK_VERSION="${{ inputs.scinsta_version }}"
+            echo "SCInsta tweak sürümü manuel olarak ayarlandı: ${SCINSTA_TWEAK_VERSION}"
+          else
+            SCINSTA_TWEAK_VERSION=$(awk '/Version:/ {print $2}' main/control)
+            echo "SCInsta tweak sürümü control dosyasından alındı: ${SCINSTA_TWEAK_VERSION}"
           fi
-          if [[ -n "${{ inputs.developer_name }}" ]]; then
-            BUILD_SCRIPT_ARGS+=" --gelistirici-adi \"${{ inputs.developer_name }}\""
-          fi
-          if [[ "${{ inputs.remove_app_icon }}" == "true" ]]; then
-            BUILD_SCRIPT_ARGS+=" --remove-app-icon" # build.sh betiğinizde bu argümanı işlemeniz gerekecek
-          fi
+          echo "SCINSTA_TWEAK_VERSION=${SCINSTA_TWEAK_VERSION}" >> "$GITHUB_ENV"
+          echo "scinsta_version=${SCINSTA_TWEAK_VERSION}" >> "$GITHUB_OUTPUT"
 
-          ./build.sh $BUILD_SCRIPT_ARGS # Hazırlanan argümanlarla derleme betiğini çalıştırır.
-
-          ls -la packages # 'packages' dizininin içeriğini listeler.
-            
-        env:
-          THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
-
-      - name: IPA'yı sürüm bilgisiyle yeniden adlandır 🏷️🔄📦✨
-        run: |
-          cd main/packages # 'packages' dizinine gider.
-          mv "$(ls -t | head -n1)" "SCInsta_sideloaded_v${SCINSTA_VERSION}.ipa" # En son oluşturulan IPA dosyasını sürüm bilgisiyle yeniden adlandırır.
-
-      - name: Paket adını yükleme eylemine ilet 📤📂➡️🔗
-        id: package_name # Bu adım için bir ID belirler.
-        run: |
-          echo "package=$(ls -t main/packages | head -n1)" >> "$GITHUB_OUTPUT" # En son paketin adını çıktı olarak ayarlar.
-
-      - name: Artifact Yükle ⬆️📦☁️✅
-        if: ${{ inputs.upload_artifact }} # Eğer 'upload_artifact' girişi doğru ise çalışır.
-        uses: actions/upload-artifact@v4 # Artifact yükleme eylemini kullanır.
-        with:
-          name: SCInsta_sideloaded_v${{ steps.scinsta_version.outputs.version }} # Yüklenecek artifact'in adı.
-          path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }} # Yüklenecek dosyanın yolu.
-          if-no-files-found: error # Dosya bulunamazsa hata verir.
+          # Instagram Uygulama Sürümünü Belirle (bu kısım build.sh'ye argüman olarak iletilmeli)
+          INSTAGRAM_APP_VERSION=""
+          if [[ -n "${{ inputs.instagram_app_version }}" ]]; then
+            INSTAGRAM_APP_VERSION="${{ inputs.instagram_app_version }}"
+            echo "Instagram uygulama sürümü manuel olarak ayarlandı: ${INSTAGRAM_APP_VERSION}"
+          else
