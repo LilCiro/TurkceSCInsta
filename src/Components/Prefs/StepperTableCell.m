@@ -3,12 +3,12 @@
 
 @implementation SCIStepperTableCell
 
-// adapted from PHVerticalAdjustmentTableCell
-
+// PHVerticalAdjustmentTableCell'den uyarlandı
 @dynamic control;
 
 /* * PSTableCell * */
 
+// Hücreyi stil ve yeniden kullanım tanımlayıcısıyla başlatır. 🛠️✨📱🔄
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier specifier:(PSSpecifier *)specifier {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier specifier:specifier]) {
 		self.accessoryView = self.control;
@@ -16,10 +16,11 @@
 	return self;
 }
 
+// Hücre içeriğini belirtici ile günceller. 🔄📊📝⚙️
 - (void)refreshCellContentsWithSpecifier:(PSSpecifier *)specifier {
 	[super refreshCellContentsWithSpecifier:specifier];
 
-    // Unmodified title template
+    // Başlık şablonu henüz ayarlanmadıysa, mevcut metni kullan.
     if (!self.titleTemplate) {
         self.titleTemplate = self.textLabel.text;
     }
@@ -33,27 +34,32 @@
 
 /* * PSControlTableCell * */
 
+// Yeni bir UIStepper kontrolü oluşturur. ➕➖🆕⚙️
 - (UIStepper *)newControl {
 	UIStepper *stepper = [[UIStepper alloc] initWithFrame:CGRectZero];    
-	stepper.continuous = NO;
+	stepper.continuous = NO; // Adım adım değişimi sağlar.
 
 	return stepper;
 }
 
+// Kontrolün mevcut değerini döndürür. 🔢📈✨💾
 - (NSNumber *)controlValue {
 	return @(self.control.value);
 }
 
+// Kontrolün değerini ayarlar. 设定📊✍️🔄
 - (void)setValue:(NSNumber *)value {
 	[super setValue:value];
 	self.control.value = value.doubleValue;
 }
 
+// Kontrol değeri değiştiğinde çağrılır. ✅🔄🔔👍
 - (void)controlChanged:(UIStepper *)stepper {
 	[super controlChanged:stepper];
 	[self _updateLabel];
 }
 
+// Etiketi günceller. ✏️📝✨📐
 - (void)_updateLabel {
 	if (!self.control) {
 		return;
@@ -61,7 +67,7 @@
 
     double value = self.control.value;
         
-    // Singular or plural labels
+    // Tekil veya çoğul etiketler için kontrol yapar.
     NSString *label;
 
     if (value == 1) {
@@ -71,7 +77,7 @@
         label = (NSString *)self.specifier.properties[@"label"];
     }
 
-    // Get correct decimal value based on step value
+    // Adım değerine göre doğru ondalık hassasiyetini belirler.
     NSUInteger valueDecimalPoints = [SCIUtils decimalPlacesInDouble:value];
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     [formatter setNumberStyle:valueDecimalPoints ? NSNumberFormatterDecimalStyle : NSNumberFormatterNoStyle];
@@ -82,6 +88,6 @@
 
 	self.textLabel.text = [NSString stringWithFormat:self.titleTemplate, stringValue, label];
 
-	[self setNeedsLayout];
+	[self setNeedsLayout]; // Hücre düzeninin yeniden çizilmesini tetikler.
 }
 @end
