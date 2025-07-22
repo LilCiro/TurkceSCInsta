@@ -144,5 +144,6 @@ Bu tweak’in kullanıldığını görmek motivasyonumu artırıyor ❤️
 # Katkıda Bulunanlar
 
 * Orijinal BHInstagram projesini oluşturan [@BandarHL](https://github.com/BandarHL)’ye büyük teşekkürler. SCInsta bu projeye dayanıyor.
+* Çevirmesini yaptığım SCInsta projesini yapan [@SoCuul](https://github.com/SoCuul)’a teşekürler
 
 ---
