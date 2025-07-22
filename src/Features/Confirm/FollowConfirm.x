@@ -6,7 +6,7 @@
 
 #define CONFIRMFOLLOW(orig)                                                      \
     if ([SCIManager getBoolPref:@"follow_confirm"]) {                            \
-        NSLog(@"[SCInsta] Takip onayı tetiklendi. 🤝✅🔒❗"); \
+        NSLog(@"[SCInsta] Takip onayı. 🤝✅🔒❗"); \
                                                                                  \
         [SCIUtils showConfirmation:^(void) { orig; }];                           \
     }                                                                            \
