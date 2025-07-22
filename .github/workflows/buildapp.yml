@@ -50,7 +50,7 @@ jobs:
           ref: master # Master branch'ini çeker.
           path: ${{ github.workspace }}/theos # Theos'u çalışma alanındaki 'theos' dizinine çeker.
           submodules: recursive # Theos'un alt modüllerini de özyinelemeli olarak çeker.
-          
+            
       - name: SDK Önbellekleme 💾⚡️📥🔄
         id: SDK # Bu adım için bir ID belirler.
         uses: actions/cache@v4 # Önbellekleme eylemini kullanır.
@@ -78,7 +78,7 @@ jobs:
           mkdir -p packages # 'packages' dizini oluşturur.
           wget "$Instagram_URL" --no-verbose -O packages/com.burbn.instagram.ipa # Belirtilen URL'den Instagram IPA'sını indirir.
           ls -la packages # 'packages' dizininin içeriğini listeler.
-          
+            
         env:
           THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
           Instagram_URL: ${{ inputs.decrypted_instagram_url }} # Girişlerden alınan Instagram URL'sini kullanır.
@@ -89,18 +89,18 @@ jobs:
           SCINSTA_VERSION=$(awk '/Version:/ {print $2}' main/control) # 'main/control' dosyasından sürüm bilgisini alır.
           echo "SCINSTA_VERSION=${SCINSTA_VERSION}" >> "$GITHUB_ENV" # Sürümü ortam değişkeni olarak ayarlar.
           echo "version=${SCINSTA_VERSION}" >> "$GITHUB_OUTPUT" # Sürümü çıktı olarak ayarlar.
-          
+            
       - name: SCInsta tweak'i sideload için derle (IPA olarak) 🏗️📱🚀📦
         run: |
           pip install --force-reinstall https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip # pyzule-rw paketini yükler.
-          
+            
           cd main # Ana depo dizinine gider.
           ls -la # Dizin içeriğini listeler.
 
           ./build.sh sideload # Derleme betiğini sideload moduyla çalıştırır.
 
           ls -la packages # 'packages' dizininin içeriğini listeler.
-          
+            
         env:
           THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
 
@@ -114,18 +114,10 @@ jobs:
         run: |
           echo "package=$(ls -t main/packages | head -n1)" >> "$GITHUB_OUTPUT" # En son paketin adını çıktı olarak ayarlar.
 
-      - name: Artifact Yükle (IPA) ⬆️📦☁️✅
+      - name: Artifact Yükle ⬆️📦☁️✅
         if: ${{ inputs.upload_artifact }} # Eğer 'upload_artifact' girişi doğru ise çalışır.
         uses: actions/upload-artifact@v4 # Artifact yükleme eylemini kullanır.
         with:
           name: SCInsta_sideloaded_v${{ steps.scinsta_version.outputs.version }} # Yüklenecek artifact'in adı.
           path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }} # Yüklenecek dosyanın yolu.
           if-no-files-found: error # Dosya bulunamazsa hata verir.
-
-      - name: Artifact Yükle (DEB) ⬆️📦☁️✅ # <<< BU KISIM SON EKLENEN KISIM >>>
-        if: ${{ inputs.upload_artifact }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: SCInsta_deb_v${{ steps.scinsta_version.outputs.version }} # Bu ad, deploy_deb.yml tarafından kullanılacak
-          path: ${{ github.workspace }}/main/packages/*.deb
-          if-no-files-found: error
