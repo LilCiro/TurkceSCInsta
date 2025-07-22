@@ -25,11 +25,14 @@ typedef NS_ENUM(NSInteger, DynamicSpecifierOperatorType) {
 };
 
 @interface SCISettingsViewController : HBListController
+
 - (instancetype)init;
+
 - (PSSpecifier *)newSectionWithTitle:(NSString *)header footer:(NSString *)footer;
 - (PSSpecifier *)newSwitchCellWithTitle:(NSString *)titleText detailTitle:(NSString *)detailText key:(NSString *)keyText changeAction:(SEL)changeAction;
 - (PSSpecifier *)newStepperCellWithTitle:(NSString *)titleText key:(NSString *)keyText min:(double)min max:(double)max step:(double)step label:(NSString *)label singularLabel:(NSString *)singularLabel;
 - (PSSpecifier *)newLinkCellWithTitle:(NSString *)titleText detailTitle:(NSString *)detailText url:(NSString *)url iconURL:(NSString *)iconURL iconTransparentBG:(BOOL)iconTransparentBG;
+
 - (void)reloadSpecifiers;
 - (void)collectDynamicSpecifiersFromArray:(NSArray *)array;
 - (BOOL)shouldHideSpecifier:(PSSpecifier *)specifier;
@@ -37,4 +40,5 @@ typedef NS_ENUM(NSInteger, DynamicSpecifierOperatorType) {
 
 - (id)readPreferenceValue:(PSSpecifier *)specifier;
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier *)specifier;
+
 @end
