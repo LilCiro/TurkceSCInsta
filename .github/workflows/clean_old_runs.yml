@@ -5,23 +5,32 @@ on:
 
 jobs:
   delete_all:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # GitHub CLI Ubuntu runner'da yüklü gelir
     permissions:
       contents: none
       actions: write # İş akışı çalıştırmalarını silebilmek için bu izne ihtiyaç duyarız
 
     steps:
+      - name: GitHub CLI Yüklü mü Kontrol Et ve Doğrula
+        run: |
+          gh --version
+          echo "GITHUB_TOKEN'ı gh CLI için yapılandırılıyor..."
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          gh auth status
+
       - name: Tüm Eski İş Akışı Çalıştırmalarını Direkt Sil 🔥
-        # BURAYI DEĞİŞTİRİYORUZ!
-        uses: mikecparr/delete-workflow-runs@v2
-        with:
-          # mikecparr/delete-workflow-runs@v2 için 'older-than' parametresi kullanılabilir
-          # Bu, belirli bir süreden daha eski olan tüm çalıştırmaları hedefler.
-          # '0' gün belirterek pratik olarak tüm geçmişi hedefleriz.
-          older-than: '0 days'
-          # Ayrıca, silmek istediğiniz belirli iş akışlarının adlarını da listeleyebilirsiniz.
-          # Tüm iş akışlarını silmek için bu parametreyi boş bırakın veya kullanmayın.
-          # workflow: 'Build and Package SCInsta, My Other Workflow' # Örnek: Belirli iş akışları için
-          # min-runs-to-keep: 0 # Her iş akışı için minimum çalıştırma sayısı, 0 tümünü siler
-          # dry-run: true # Gerçekten silmeden önce ne olacağını görmek için 'true' yapın (önerilir!)
-          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Depodaki tüm iş akışı çalıştırmaları listeleniyor ve siliniyor..."
+          # Tüm iş akışı ID'lerini al ve her birini sil
+          # Not: Bu komut, başarılı olsa bile "yinelemeli olarak sil" gibi bir uyarı verebilir.
+          # '--repo "${{ github.repository }}"' mevcut depoyu belirtir
+          # '--limit 1000' bir seferde en fazla 1000 çalıştırmayı listeler, ihtiyaca göre artırılabilir
+          # '--json databaseId' her çalıştırmanın ID'sini JSON formatında alır
+          # 'jq -r '.[].databaseId'' bu JSON'dan sadece ID'leri çıkarır
+          # 'xargs -I {} gh run delete {} --repo "${{ github.repository }}"' her ID için silme komutunu çalıştırır.
+          
+          gh run list --repo "${{ github.repository }}" --limit 1000 --json databaseId | jq -r '.[].databaseId' | xargs -I {} gh run delete {} --repo "${{ github.repository }}" --yes
+
+          echo "Silme işlemi tamamlandı. Değişikliklerin GitHub arayüzünde yansıması biraz zaman alabilir."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh CLI'ın token'ı kullanmasını sağlar
