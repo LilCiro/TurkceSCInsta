@@ -15,11 +15,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Bu adım, manuel tetikleme durumunda hangi çalıştırmanın artifact'ını indireceğini belirlemek için
-            // biraz daha karmaşık hale geliyor. Genellikle en son başarılı derlemeyi hedefleriz.
-            // Eğer belirli bir derleme ID'si ile tetiklemek isterseniz, 'workflow_dispatch' input'larına ekleyebilirsiniz.
-            // Şimdilik, en son başarılı 'Build and Package SCInsta' çalıştırmasının artifact'ını indirmeye çalışacağız.
-
+            // En son başarılı 'Build and Package SCInsta' çalıştırmasının artifact'ını indirmeye çalışacağız.
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const workflowName = 'Build and Package SCInsta'; // Kaynak iş akışının adı
@@ -65,8 +61,8 @@ jobs:
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/deb_artifact.zip`, Buffer.from(download.data));
           
           env:
-            DEB_REPO_SLUG: "LilCiro/scinsta-repo"
-            DEB_REPO_BRANCH: "gh-pages"
+            DEB_REPO_SLUG: "LilCiro/scinsta-repo" # Kendi kullanıcı adın/depo adın
+            DEB_REPO_BRANCH: "gh-pages" # GitHub Pages için genellikle 'gh-pages' branch'i kullanılır
 
       - name: İndirilen Artifact'ı Çıkar 📦
         run: |
@@ -98,26 +94,26 @@ jobs:
           dpkg-scanpackages -m debs /dev/null > Packages || { echo "Hata: Packages dosyası oluşturulamadı."; exit 1; }
           gzip -c Packages > Packages.gz || { echo "Hata: Packages.gz sıkıştırılamadı."; exit 1; }
 
-          echo "Origin: SCInsta Tweak Deposu" > Release
-          echo "Label: SCInsta" >> Release
-          echo "Suite: stable" >> Release
-          echo "Version: 1.0" >> Release
-          echo "Codename: ios" >> Release
-          echo "Architectures: iphoneos-arm" >> Release
-          echo "Components: main" >> Release
-          echo "Description: Instagram deneyiminizi geliştiren SCInsta tweakleri." >> Release
-          
-          echo "MD5Sum:" >> Release
-          md5sum Packages | awk '{print " " $1 " Packages"}' >> Release
-          md5sum Packages.gz | awk '{print " " $1 " Packages.gz"}' >> Release
-
-          echo "SHA1:" >> Release
-          sha1sum Packages | awk '{print " " $1 " Packages"}' >> Release
-          sha1sum Packages.gz | awk '{print " " $1 " Packages.gz"}' >> Release
-
-          echo "SHA256:" >> Release
-          sha256sum Packages | awk '{print " " $1 " Packages"}' >> Release
-          sha256sum Packages.gz | awk '{print " " $1 " Packages"}' >> Release
+          # Release dosyasını oluşturan ve güncelleyen kısım
+          { # Bu süslü parantez bloğu, tüm echo komutlarının tek bir shell komutu gibi çalışmasını sağlar
+            echo "Origin: SCInsta Tweak Deposu"
+            echo "Label: SCInsta"
+            echo "Suite: stable"
+            echo "Version: 1.0"
+            echo "Codename: ios"
+            echo "Architectures: iphoneos-arm"
+            echo "Components: main"
+            echo "Description: Instagram deneyiminizi geliştiren SCInsta tweakleri."
+            echo "MD5Sum:"
+            md5sum Packages | awk '{print " " $1 " Packages"}'
+            md5sum Packages.gz | awk '{print " " $1 " Packages.gz"}'
+            echo "SHA1:"
+            sha1sum Packages | awk '{print " " $1 " Packages"}'
+            sha1sum Packages.gz | awk '{print " " $1 " Packages.gz"}'
+            echo "SHA256:"
+            sha256sum Packages | awk '{print " " $1 " Packages"}'
+            sha256sum Packages.gz | awk '{print " " $1 " Packages"}'
+          } > Release # Tüm bu çıktıyı Release dosyasına yönlendir
 
       - name: Değişiklikleri Commit Et ve Push Et 📤
         working-directory: deb_repo
