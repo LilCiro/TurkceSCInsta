@@ -6,10 +6,6 @@ CMAKE_OSX_ARCHITECTURES="arm64e;arm64"
 CMAKE_OSX_SYSROOT="iphoneos"
 
 # Prerequisites
-if [ -z "$(ls -A modules/FLEXing)" ]; then
-    echo -e '\033[1m\033[0;31mFLEXing submodule not found.\nPlease run the following command to checkout submodules:\n\n\033[0m    git submodule update --init --recursive'
-    exit 1
-fi
 
 # Building modes
 if [ "$1" == "sideload" ];
@@ -31,11 +27,11 @@ then
     # Check if building with dev mode
     if [ "$2" == "--dev" ];
     then
-        FLEXPATH='packages/FLEXing.dylib packages/libflex.dylib'
+        
 
         make "DEV=1"
     else
-        FLEXPATH='.theos/obj/debug/FLEXing.dylib .theos/obj/debug/libflex.dylib'
+        
 
         make "SIDELOAD=1"
     fi
