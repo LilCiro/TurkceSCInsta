@@ -52,6 +52,17 @@ if [ -z "$(ls -A modules/FLEXing)" ]; then
     exit 1
 fi
 
+# Ortam değişkeni THEOS'u ayarlıyoruz (eğer zaten ayarlı değilse)
+if [ -z "${THEOS}" ]; then
+    export THEOS=$(realpath ../theos) # Projenin ana dizinine göre ayarlayın
+fi
+export THEOS_SDK_PATH=${THEOS}/sdks/iPhoneOS14.5.sdk # Kullandığınız SDK yolu
+
+# packages dizinini baştan oluşturup gerekli izinleri verelim
+mkdir -p packages
+chmod 755 packages
+echo "packages/ dizini oluşturuldu ve izinleri ayarlandı."
+
 # --- Derleme Modları ---
 if [ "${BUILD_MODE}" == "sideload" ]; then
 
@@ -158,30 +169,35 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     echo "Değiştirilmiş uygulamayı geçici IPA'ya sıkıştırılıyor..."
     TEMP_MODIFIED_IPA_PATH="packages/temp_modified_base.ipa"
     
-    # Sıkıştırma için Payload dizinini oluştur ve .app'i içine taşı
-    # Bu, 'Payload/Instagram.app' yapısını garantiler.
-    ZIP_TEMP_DIR="packages/zip_temp_dir"
-    rm -rf "$ZIP_TEMP_DIR"
-    mkdir -p "$ZIP_TEMP_DIR/Payload"
+    # Yeni bir geçici dizin oluştur (buraya Payload ve .app taşınacak)
+    FINAL_ZIP_SOURCE_DIR="packages/final_zip_source"
+    rm -rf "$FINAL_ZIP_SOURCE_DIR"
+    mkdir -p "$FINAL_ZIP_SOURCE_DIR/Payload" # Zip dosyasının içinde Payload klasörü olacak
+
+    # Modifiye edilmiş .app paketini, sıkıştırma için hazırlanmış Payload dizinine taşı
+    # Bu adımda APP_DIR, packages/modded_ipa_base/Payload/Instagram.app gibi olmalı
+    # Bu yüzden buraya direkt APP_DIR'ı taşıyoruz
+    mv "$APP_DIR" "$FINAL_ZIP_SOURCE_DIR/Payload/" 
     
-    # Modifiye edilmiş .app paketini yeni Payload dizinine taşı
-    # mv komutunu Payload dizininin içine taşımak için / kullanmayın.
-    mv "$APP_DIR" "$ZIP_TEMP_DIR/Payload" 
-    
-    # 'zip_temp_dir' dizinine gidip, 'Payload' klasörünü sıkıştır
-    cd "$ZIP_TEMP_DIR"
+    # Sıkıştırma sonrası kalacak olan modifiye edilmiş base dizini temizle
+    rm -rf "$IPA_BASE_DIR"
+
+    # `final_zip_source` dizinine gidip, `Payload` klasörünü sıkıştır
+    cd "$FINAL_ZIP_SOURCE_DIR"
     # Sadece Payload klasörünü ve içindekileri sıkıştır.
     # Çıktı IPA ana dizine göre yolunu belirtiyoruz.
     zip -r -q "../../${TEMP_MODIFIED_IPA_PATH##*/}" Payload/
     cd ../.. # Ana dizine geri dön
 
-    # Kullanılan geçici klasörleri temizle
-    rm -rf "$IPA_BASE_DIR" # Eski modifiye edilmiş .app'i içeren base dizin
-    rm -rf "$ZIP_TEMP_DIR" # Zip işlemi için kullanılan geçici dizin
+    # Kullanılan geçici zip dizinini temizle
+    rm -rf "$FINAL_ZIP_SOURCE_DIR"
 
     # Oluşturulan geçici IPA dosyasının varlığını kontrol et
     if [ ! -f "$TEMP_MODIFIED_IPA_PATH" ]; then
         echo "Hata: Geçici IPA dosyası ($TEMP_MODIFIED_IPA_PATH) oluşturulamadı! ❌"
+        # Hata durumunda hata ayıklama için dizin içeriğini listeleyelim
+        echo "Hata ayıklama: packages/ dizin içeriği:"
+        ls -la packages/
         exit 1
     fi
 
