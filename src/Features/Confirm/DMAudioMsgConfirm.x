@@ -4,7 +4,7 @@
 %hook IGDirectThreadViewController
 - (void)voiceRecordViewController:(id)arg1 didRecordAudioClipWithURL:(id)arg2 waveform:(id)arg3 duration:(CGFloat)arg4 entryPoint:(NSInteger)arg5 {
     if ([SCIManager getBoolPref:@"voice_message_confirm"]) {
-        NSLog(@"[SCInsta] DM sesli mesaj onayı tetiklendi. 🎤💬🛡️✔️");
+        NSLog(@"[SCInsta] DM sesli mesaj onayı. 🎤💬🛡️✔️");
 
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
