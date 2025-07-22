@@ -1,85 +1,191 @@
 #!/usr/bin/env bash
 
+# Hata durumunda betiği durdur
 set -e
 
-CMAKE_OSX_ARCHITECTURES="arm64e;arm64"
-CMAKE_OSX_SYSROOT="iphoneos"
+# --- Varsayılan Değerler ---
+APP_NAME=""
+DEVELOPER_NAME=""
+REMOVE_APP_ICON="false"
+CUSTOM_INSTAGRAM_VERSION=""
+BUILD_MODE="" # Derleme modunu saklamak için
 
-# Prerequisites
+# --- Argümanları Ayrıştırma ---
+echo "Argümanlar ayrıştırılıyor..."
+# İlk argüman her zaman derleme modu olmalı (sideload/rootless/rootful)
+BUILD_MODE="$1"
+shift # BUILD_MODE'u işledikten sonra kaydır
+
+# Kalan argümanları işle
+while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+        --uygulama-adi)
+            APP_NAME="$2"
+            shift
+            ;;
+        --gelistirici-adi)
+            DEVELOPER_NAME="$2"
+            shift
+            ;;
+        --remove-app-icon)
+            REMOVE_APP_ICON="true"
+            ;;
+        --instagram-sürümü)
+            CUSTOM_INSTAGRAM_VERSION="$2"
+            shift
+            ;;
+        --dev) # Sideload modu için geliştirme bayrağı
+            DEV_MODE="true"
+            ;;
+        *)
+            echo "Hata: Bilinmeyen argüman '$1'"
+            exit 1
+            ;;
+    esac
+    shift # Bir sonraki argümana geç
+done
+
+# --- Önkoşullar ---
+# FLEXing submodule kontrolü
 if [ -z "$(ls -A modules/FLEXing)" ]; then
-    echo -e '\033[1m\033[0;31mFLEXing submodule not found.\nPlease run the following command to checkout submodules:\n\n\033[0m    git submodule update --init --recursive'
+    echo -e '\033[1m\033[0;31mFLEXing alt modülü bulunamadı. ❌\nLütfen alt modülleri çekmek için şu komutu çalıştırın:\n\n\033[0m    git submodule update --init --recursive'
     exit 1
 fi
 
-# Building modes
-if [ "$1" == "sideload" ];
-then
+# --- Derleme Modları ---
+if [ "${BUILD_MODE}" == "sideload" ]; then
 
-    # Clean build artifacts
+    echo -e '\033[1m\033[32mSCInsta tweak IPA olarak sideload için derleniyor... 📱✨\033[0m'
+
+    # Derleme kalıntılarını temizle 🧹
     make clean
     rm -rf .theos
 
-    # Check for decrypted instagram ipa
+    # Orijinal Instagram IPA dosyasını kontrol et ve aç 🔍
     ipaFile="$(find ./packages/*com.burbn.instagram*.ipa -type f -exec basename {} \;)"
     if [ -z "${ipaFile}" ]; then
-        echo -e '\033[1m\033[0;31m./packages/com.burbn.instagram.ipa not found.\nPlease put a decrypted Instagram IPA in its path.\033[0m'
+        echo -e '\033[1m\033[0;31m./packages/com.burbn.instagram.ipa bulunamadı. ❌\nLütfen şifresi çözülmüş bir Instagram IPA dosyasını bu yola yerleştirin.\033[0m'
         exit 1
     fi
 
-    echo -e '\033[1m\033[32mBuilding SCInsta tweak for sideloading (as IPA)\033[0m'
+    echo "IPA dosyası açılıyor ve hazırlanıyor..."
+    # IPA'yı geçici bir dizine aç
+    unzip -q "packages/${ipaFile}" -d "packages/temp_ipa_content"
+    # Payload klasörünü al (içinde .app bulunur)
+    mv "packages/temp_ipa_content/Payload" "packages/Payload"
+    # Geçici dizini temizle
+    rm -rf "packages/temp_ipa_content"
 
-    # Check if building with dev mode
-    if [ "$2" == "--dev" ];
-    then
-        FLEXPATH='packages/FLEXing.dylib packages/libflex.dylib'
+    # Uygulamanın tam yolunu belirle
+    APP_DIR="packages/Payload/Instagram.app"
+    INFO_PLIST="${APP_DIR}/Info.plist"
 
+    # Info.plist dosyasının varlığını kontrol et
+    if [ ! -f "$INFO_PLIST" ]; then
+        echo "Hata: Info.plist dosyası '$INFO_PLIST' bulunamadı. IPA yapısı beklenenden farklı olabilir."
+        exit 1
+    fi
+
+    # --- Özelleştirmeleri Uygula (Info.plist ve İkonlar) ---
+
+    # 1. Uygulama Adını Değiştirme
+    if [ -n "$APP_NAME" ]; then
+        echo "Uygulama adı '${APP_NAME}' olarak ayarlanıyor..."
+        /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName $APP_NAME" "$INFO_PLIST" || { echo "PlistBuddy CFBundleDisplayName hatası!"; exit 1; }
+        /usr/libexec/PlistBuddy -c "Set :CFBundleName $APP_NAME" "$INFO_PLIST" || { echo "PlistBuddy CFBundleName hatası!"; exit 1; }
+    fi
+
+    # 2. Geliştirici Adını Değiştirme (Not: Genellikle Info.plist'te standart bir anahtar değildir)
+    if [ -n "$DEVELOPER_NAME" ]; then
+        echo "Geliştirici adı '${DEVELOPER_NAME}' olarak ayarlanmaya çalışılıyor..."
+        # Bu genellikle uygulamanın kendisi içinde sabitlenmiştir ve Info.plist üzerinden değiştirilemez.
+        # Eğer özel bir anahtar varsa (nadiren):
+        # /usr/libexec/PlistBuddy -c "Set :YourCustomDeveloperKey $DEVELOPER_NAME" "$INFO_PLIST" || true
+    fi
+
+    # 3. Instagram Uygulama Sürümünü Ayarlama
+    if [ -n "$CUSTOM_INSTAGRAM_VERSION" ]; then
+        echo "Instagram uygulama sürümü '${CUSTOM_INSTAGRAM_VERSION}' olarak ayarlanıyor..."
+        /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $CUSTOM_INSTAGRAM_VERSION" "$INFO_PLIST" || { echo "PlistBuddy CFBundleShortVersionString hatası!"; exit 1; }
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $CUSTOM_INSTAGRAM_VERSION" "$INFO_PLIST" || { echo "PlistBuddy CFBundleVersion hatası!"; exit 1; }
+    else
+        echo "Instagram uygulama sürümü için özel bir değer belirtilmedi, orijinal sürüm kullanılacak."
+    fi
+
+    # 4. Uygulama İkonunu Kaldırma
+    if [ "$REMOVE_APP_ICON" == "true" ]; then
+        echo "Uygulama ikonları kaldırılıyor..."
+        # İkon setini sil (AppIcon.appiconset klasörü varsa)
+        rm -rf "${APP_DIR}/AppIcon.appiconset" || true
+        # Info.plist'ten ikon referanslarını kaldır
+        /usr/libexec/PlistBuddy -c "Delete :CFBundleIcons" "$INFO_PLIST" || true
+        /usr/libexec/PlistBuddy -c "Delete :CFBundleIcons~ipad" "$INFO_PLIST" || true
+        /usr/libexec/PlistBuddy -c "Delete :UIPrerenderedIcon" "$INFO_PLIST" || true
+        echo "Uygulama ikonları başarıyla kaldırıldı (veya kaldırılmaya çalışıldı)."
+    fi
+
+    # --- Tweak'i Derle ---
+    echo "Tweak derleniyor..."
+    FLEXPATH_ARGS=""
+    if [ "${DEV_MODE}" == "true" ]; then
+        FLEXPATH_ARGS='packages/FLEXing.dylib packages/libflex.dylib'
         make "DEV=1"
     else
-        FLEXPATH='.theos/obj/debug/FLEXing.dylib .theos/obj/debug/libflex.dylib'
-
+        FLEXPATH_ARGS='.theos/obj/debug/FLEXing.dylib .theos/obj/debug/libflex.dylib'
         make "SIDELOAD=1"
     fi
 
-    # Create IPA File
-    echo -e '\033[1m\033[32mCreating the IPA file...\033[0m'
-    rm -f packages/SCInsta-sideloaded.ipa
-    cyan -i "packages/${ipaFile}" -o packages/SCInsta-sideloaded.ipa -f .theos/obj/debug/SCInsta.dylib .theos/obj/debug/sideloadfix.dylib $FLEXPATH -c 0 -m 15.0 -du
-    
-    echo -e "\033[1m\033[32mDone, we hope you enjoy SCInsta!\033[0m\n\nYou can find the ipa file at: $(pwd)/packages"
+    # --- Değiştirilmiş Uygulamayı Geçici Bir IPA'ya Sıkıştır ---
+    echo "Değiştirilmiş uygulamayı geçici IPA'ya sıkıştırılıyor..."
+    TEMP_MODIFIED_IPA="packages/temp_modified_base.ipa"
+    cd packages/Payload # Payload dizinine git
+    zip -r -q "../${TEMP_MODIFIED_IPA##*/}" . # Payload içeriğini sıkıştır
+    cd ../.. # Ana dizine geri dön
+    rm -rf packages/Payload # Payload klasörünü temizle
 
-elif [ "$1" == "rootless" ];
-then
+    # --- Tweak'i Geçici IPA'ya Enjekte Et ve Nihai IPA'yı Oluştur ---
+    echo -e '\033[1m\033[32mNihai IPA dosyası oluşturuluyor... 🚀\033[0m'
+    rm -f packages/SCInsta-sideloaded.ipa # Eski IPA'yı sil
+
+    # cyan komutu ile tweak dylib'lerini enjekte et
+    cyan -i "packages/${TEMP_MODIFIED_IPA##*/}" -o packages/SCInsta-sideloaded.ipa -f .theos/obj/debug/SCInsta.dylib .theos/obj/debug/sideloadfix.dylib ${FLEXPATH_ARGS} -c 0 -m 15.0 -du
     
-    # Clean build artifacts
+    # Geçici IPA'yı temizle
+    rm -f "packages/${TEMP_MODIFIED_IPA##*/}"
+
+    echo -e "\033[1m\033[32mTamamlandı, SCInsta'yı beğeneceğinizi umuyoruz! 🎉😊\n\nIPA dosyasını şu adreste bulabilirsiniz: $(pwd)/packages\033[0m"
+
+elif [ "${BUILD_MODE}" == "rootless" ]; then
+    
+    echo -e '\033[1m\033[32mSCInsta tweak rootless için derleniyor... 🌿📱\033[0m'
+
+    # Derleme kalıntılarını temizle 🧹
     make clean
     rm -rf .theos
-
-    echo -e '\033[1m\033[32mBuilding SCInsta tweak for rootless\033[0m'
 
     export THEOS_PACKAGE_SCHEME=rootless
-    make package
+    make package # MAKE_ARGS'ı make package ile birleştir (uygulama adı/geliştirici adı tweak'in deb'ini etkiler)
 
-    echo -e "\033[1m\033[32mDone, we hope you enjoy SCInsta!\033[0m\n\nYou can find the deb file at: $(pwd)/packages"
+    echo -e "\033[1m\033[32mTamamlandı, SCInsta'yı beğeneceğinizi umuyoruz! 🎉😊\n\nDeb dosyasını şu adreste bulabilirsiniz: $(pwd)/packages\033[0m"
 
-elif [ "$1" == "rootful" ];
-then
+elif [ "${BUILD_MODE}" == "rootful" ]; then
 
-    # Clean build artifacts
+    echo -e '\033[1m\033[32mSCInsta tweak rootful için derleniyor... 🌳📱\033[0m'
+
+    # Derleme kalıntılarını temizle 🧹
     make clean
     rm -rf .theos
 
-    echo -e '\033[1m\033[32mBuilding SCInsta tweak for rootful\033[0m'
-
     unset THEOS_PACKAGE_SCHEME
-    make package
+    make package # MAKE_ARGS'ı make package ile birleştir (uygulama adı/geliştirici adı tweak'in deb'ini etkiler)
 
-    echo -e "\033[1m\033[32mDone, we hope you enjoy SCInsta!\033[0m\n\nYou can find the deb file at: $(pwd)/packages"
+    echo -e "\033[1m\033[32mTamamlandı, SCInsta'yı beğeneceğinizi umuyoruz! 🎉😊\n\nDeb dosyasını şu adreste bulabilirsiniz: $(pwd)/packages\033[0m"
 
 else
     echo '+--------------------+'
-    echo '|SCInsta Build Script|'
+    echo '|SCInsta Derleme Betiği|'
     echo '+--------------------+'
     echo
-    echo 'Usage: ./build.sh <sideload/rootless/rootful>'
+    echo 'Kullanım: ./build.sh <sideload/rootless/rootful> [--uygulama-adi "Yeni Ad" (Opsiyonel)] [--gelistirici-adi "Yeni Ad" (Opsiyonel)] [--instagram-sürümü "Yeni Sürüm" (Opsiyonel)] [--remove-app-icon (Opsiyonel)] [--dev (Sadece sideload için)]'
     exit 1
 fi
