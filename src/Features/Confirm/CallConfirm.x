@@ -2,10 +2,10 @@
 #import "../../Utils.h"
 
 %hook IGDirectThreadCallButtonsCoordinator
-// Voice Call
+// Sesli Arama
 - (void)_didTapAudioButton:(id)arg1 {
     if ([SCIManager getBoolPref:@"call_confirm"]) {
-        NSLog(@"[SCInsta] Call confirm triggered");
+        NSLog(@"[SCInsta] Çağrı onayı tetiklendi. 📞"); // Güncellendi
 
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
@@ -13,10 +13,10 @@
     }
 }
 
-// Video Call
+// Görüntülü Arama
 - (void)_didTapVideoButton:(id)arg1 {
     if ([SCIManager getBoolPref:@"call_confirm"]) {
-        NSLog(@"[SCInsta] Call confirm triggered");
+        NSLog(@"[SCInsta] Çağrı onayı tetiklendi. 📞"); // Güncellendi
         
         [SCIUtils showConfirmation:^(void) { %orig; }];
     } else {
