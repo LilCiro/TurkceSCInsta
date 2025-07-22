@@ -125,21 +125,6 @@ $ ./build.sh <sideload/rootless/rootful>
 
 # Katkıda Bulunanlar
 
-Bu tweak’e yapılan katkılar çok değerlidir. Katkıda bulunmak isterseniz pull request göndermekten çekinmeyin.
-
-Teknik bilgiye sahip değilseniz, dokümantasyonun geliştirilmesi de her zaman çok yardımcı olur!
-
-# Projeyi Destekleyin
-
-SCInsta geliştirmek çok zaman alıyor, çünkü Instagram sürekli değişiyor ve takip etmek zor. Ayrıca ben bir öğrenciyim ve fazla zamanım yok.
-
-Çalışmalarıma destek olmak istersen [ko-fi sayfama](https://ko-fi.com/socuul) bağış yapabilirsin!
-Bu projeyi desteklemenin başka yolları da var; mesela tweak’in linkini ilgilenebilecek insanlarla paylaşmak gibi!
-
-Bu tweak’in kullanıldığını görmek motivasyonumu artırıyor ❤️
-
-# Katkıda Bulunanlar
-
 * Orijinal BHInstagram projesini oluşturan [@BandarHL](https://github.com/BandarHL)’ye büyük teşekkürler. SCInsta bu projeye dayanıyor.
 * Çevirmesini yaptığım SCInsta projesini yapan [@SoCuul](https://github.com/SoCuul)’a teşekürler
 
