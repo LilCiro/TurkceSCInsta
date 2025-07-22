@@ -21,16 +21,13 @@ jobs:
       - name: Tüm Eski İş Akışı Çalıştırmalarını Direkt Sil 🔥
         run: |
           echo "Depodaki tüm iş akışı çalıştırmaları listeleniyor ve siliniyor..."
-          # Tüm iş akışı ID'lerini al ve her birini sil
-          # Not: Bu komut, başarılı olsa bile "yinelemeli olarak sil" gibi bir uyarı verebilir.
-          # '--repo "${{ github.repository }}"' mevcut depoyu belirtir
-          # '--limit 1000' bir seferde en fazla 1000 çalıştırmayı listeler, ihtiyaca göre artırılabilir
-          # '--json databaseId' her çalıştırmanın ID'sini JSON formatında alır
-          # 'jq -r '.[].databaseId'' bu JSON'dan sadece ID'leri çıkarır
-          # 'xargs -I {} gh run delete {} --repo "${{ github.repository }}"' her ID için silme komutunu çalıştırır.
-          
-          gh run list --repo "${{ github.repository }}" --limit 1000 --json databaseId | jq -r '.[].databaseId' | xargs -I {} gh run delete {} --repo "${{ github.repository }}" --yes
+          # Tüm iş akışı ID'lerini al
+          RUN_IDS=$(gh run list --repo "${{ github.repository }}" --limit 1000 --json databaseId | jq -r '.[].databaseId')
+
+          # Her bir çalıştırma ID'si için silme komutunu çalıştır
+          # yes | gh run delete komutu, her onay sorgusuna 'y' yanıtı verir.
+          echo "$RUN_IDS" | xargs -I {} bash -c 'echo "Siliniyor: {}"; yes | gh run delete {} --repo "${{ github.repository }}"'
 
           echo "Silme işlemi tamamlandı. Değişikliklerin GitHub arayüzünde yansıması biraz zaman alabilir."
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # gh CLI'ın token'ı kullanmasını sağlar
+          GH_TOKEN: ${{ secrets.TOKEN }} # gh CLI'ın token'ı kullanmasını sağlar
