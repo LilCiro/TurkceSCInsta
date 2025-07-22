@@ -85,6 +85,7 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
     # Payload klasörünü yeni, kalıcı bir yere taşı (burayı IPA_BASE_DIR olarak kullanacağız)
     IPA_BASE_DIR="packages/modded_ipa_base"
     rm -rf "$IPA_BASE_DIR" # Önceki kalıntıları temizle
+    # Sadece Payload içeriğini (yani .app'i) modded_ipa_base içine taşı
     mv "${IPA_EXTRACT_DIR}/Payload" "$IPA_BASE_DIR"
     rm -rf "$IPA_EXTRACT_DIR" # Geçici çıkarma dizinini temizle
 
@@ -156,27 +157,41 @@ if [ "${BUILD_MODE}" == "sideload" ]; then
 
     # --- Değiştirilmiş Uygulamayı Geçici Bir IPA'ya Sıkıştır ---
     echo "Değiştirilmiş uygulamayı geçici IPA'ya sıkıştırılıyor..."
-    TEMP_MODIFIED_IPA="packages/temp_modified_base.ipa"
+    TEMP_MODIFIED_IPA_PATH="packages/temp_modified_base.ipa"
     
-    # Doğrudan IPA_BASE_DIR (yani packages/modded_ipa_base/Payload) içindeki her şeyi sıkıştır
-    # Zip komutu, klasör adının da dahil edilmesini sağlamalıdır.
-    # Bu, 'Payload/Instagram.app' yapısını korur.
-    cd "$IPA_BASE_DIR" # Payload klasörünün olduğu dizine git
-    zip -r -q "../../${TEMP_MODIFIED_IPA##*/}" . # Bulunduğun dizini (Payload) ve altındaki her şeyi sıkıştır.
+    # Sıkıştırma için Payload dizinini oluştur ve .app'i içine taşı
+    # Bu, 'Payload/Instagram.app' yapısını garantiler.
+    ZIP_SOURCE_DIR="packages/temp_payload_for_zip"
+    rm -rf "$ZIP_SOURCE_DIR"
+    mkdir -p "$ZIP_SOURCE_DIR/Payload"
+    
+    # Modifiye edilmiş .app paketini yeni Payload dizinine taşı
+    mv "$APP_DIR" "$ZIP_SOURCE_DIR/Payload/"
+    
+    # `packages` dizinine dönüp, `temp_payload_for_zip` içindeki `Payload`'ı sıkıştır
+    cd "$ZIP_SOURCE_DIR"
+    # Sadece Payload klasörünü sıkıştır, kök dizine değil.
+    zip -r -q "../../${TEMP_MODIFIED_IPA_PATH##*/}" Payload/
     cd ../.. # Ana dizine geri dön
 
-    # Kullanılan Payload klasörünü temizle
-    rm -rf "$IPA_BASE_DIR"
+    # Kullanılan geçici Payload klasörünü temizle
+    rm -rf "$ZIP_SOURCE_DIR"
+
+    # Oluşturulan geçici IPA dosyasının varlığını kontrol et
+    if [ ! -f "$TEMP_MODIFIED_IPA_PATH" ]; then
+        echo "Hata: Geçici IPA dosyası ($TEMP_MODIFIED_IPA_PATH) oluşturulamadı! ❌"
+        exit 1
+    fi
 
     # --- Tweak'i Geçici IPA'ya Enjekte Et ve Nihai IPA'yı Oluştur ---
     echo -e '\033[1m\033[32mNihai IPA dosyası oluşturuluyor... 🚀\033[0m'
     rm -f packages/SCInsta-sideloaded.ipa # Eski IPA'yı sil
 
     # cyan komutu ile tweak dylib'lerini enjekte et
-    cyan -i "packages/${TEMP_MODIFIED_IPA##*/}" -o packages/SCInsta-sideloaded.ipa -f .theos/obj/debug/SCInsta.dylib .theos/obj/debug/sideloadfix.dylib ${FLEXPATH_ARGS} -c 0 -m 15.0 -du
+    cyan -i "$TEMP_MODIFIED_IPA_PATH" -o packages/SCInsta-sideloaded.ipa -f .theos/obj/debug/SCInsta.dylib .theos/obj/debug/sideloadfix.dylib ${FLEXPATH_ARGS} -c 0 -m 15.0 -du
     
     # Geçici IPA'yı temizle
-    rm -f "packages/${TEMP_MODIFIED_IPA##*/}"
+    rm -f "$TEMP_MODIFIED_IPA_PATH"
 
     echo -e "\033[1m\033[32mTamamlandı, SCInsta'yı beğeneceğinizi umuyoruz! 🎉😊\n\nIPA dosyasını şu adreste bulabilirsiniz: $(pwd)/packages\033[0m"
 
