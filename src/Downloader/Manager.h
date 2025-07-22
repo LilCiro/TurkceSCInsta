@@ -1,32 +1,34 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 
+// SCIDownloadDelegateProtocol: İndirme olaylarını dinlemek için protokol
 @protocol SCIDownloadDelegateProtocol <NSObject>
 
-// Methods
-- (void)downloadDidStart;
-- (void)downloadDidCancel;
-- (void)downloadDidProgress:(float)progress;
-- (void)downloadDidFinishWithError:(NSError *)error;
-- (void)downloadDidFinishWithFileURL:(NSURL *)fileURL;
+// Metotlar
+- (void)downloadDidStart; // İndirme başladığında çağrılır 🚀
+- (void)downloadDidCancel; // İndirme iptal edildiğinde çağrılır ❌
+- (void)downloadDidProgress:(float)progress; // İndirme ilerledikçe çağrılır 📊
+- (void)downloadDidFinishWithError:(NSError *)error; // İndirme hatayla tamamlandığında çağrılır 🚨
+- (void)downloadDidFinishWithFileURL:(NSURL *)fileURL; // İndirme başarıyla tamamlandığında dosya URL'si ile çağrılır ✅
 
 @end
 
+// SCIDownloadManager: Dosya indirme işlemlerini yöneten sınıf
 @interface SCIDownloadManager : NSObject <NSURLSessionDownloadDelegate>
 
-// Properties
-@property (nonatomic, weak) id<SCIDownloadDelegateProtocol> delegate;
-@property (nonatomic, strong) NSURLSession *session;
-@property (nonatomic, strong) NSURLSessionDownloadTask *task;
-@property (nonatomic, strong) NSString *fileExtension;
+// Özellikler
+@property (nonatomic, weak) id<SCIDownloadDelegateProtocol> delegate; // İndirme olaylarını dinleyecek delege 🤝
+@property (nonatomic, strong) NSURLSession *session; // URL oturumu 🌐
+@property (nonatomic, strong) NSURLSessionDownloadTask *task; // İndirme görevi ⬇️
+@property (nonatomic, strong) NSString *fileExtension; // İndirilen dosyanın uzantısı 📄
 
-// Methods
-- (instancetype)initWithDelegate:(id<SCIDownloadDelegateProtocol>)downloadDelegate;
+// Metotlar
+- (instancetype)initWithDelegate:(id<SCIDownloadDelegateProtocol>)downloadDelegate; // Delege ile başlatıcı 🛠️
 
-- (void)downloadFileWithURL:(NSURL *)url fileExtension:(NSString *)fileExtension;
+- (void)downloadFileWithURL:(NSURL *)url fileExtension:(NSString *)fileExtension; // Belirtilen URL'den dosyayı indirir 📥
 
-- (void)cancelDownload;
+- (void)cancelDownload; // Devam eden indirme işlemini iptal eder 🛑
 
-- (NSURL *)moveFileToCacheDir:(NSURL *)oldPath;
+- (NSURL *)moveFileToCacheDir:(NSURL *)oldPath; // İndirilen dosyayı önbellek dizinine taşır 📁
 
 @end
