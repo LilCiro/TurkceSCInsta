@@ -89,7 +89,7 @@ iOS için Instagram’a özel, çok sayıda özellik içeren türkçe bir tweak!
 
 TürkçeSCInsta ayarlarını değiştirmek [bu sayfaya](https://github.com/LilCiro/TurkceSCInsta/wiki/SCInsta-Ayarlar%C4%B1n%C4%B1-De%C4%9Fi%C5%9Ftirme) göz atabilirsin 
 
-# Uygulama içi ekran görüntüleri
+# Uygulama içi ekran görüntüleri (22.07.2025)
 
 |                                             |                                             |                                             |
 | :-----------------------------------------: | :-----------------------------------------: | :-----------------------------------------: |
