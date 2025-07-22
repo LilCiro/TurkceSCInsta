@@ -46,7 +46,7 @@
 }
 
 // Pref Stepper Cell
-- (PSSpecifier *)newStepperCellWithTitle:(NSString *)titleText key:(NSString *)keyText min:(double)min max:(double)max step:(double)step label:(NSString *)label singularLabel:(NSString *)singularLabel {
+- (PSSpecifier *)newStepperCellWithTitle:(NSString *)titleText key:(NSString *)keyText min:(double)min max:(double)doublemax step:(double)step label:(NSString *)label singularLabel:(NSString *)singularLabel {
     PSSpecifier *stepperCell = [PSSpecifier preferenceSpecifierNamed:titleText target:self set:@selector(setPreferenceValue:specifier:) get:@selector(readPreferenceValue:) detail:nil cell:PSTitleValueCell edit:nil];
     
     [stepperCell setProperty:keyText forKey:@"key"];
@@ -56,7 +56,7 @@
     [stepperCell setProperty:NSBundle.mainBundle.bundleIdentifier forKey:@"defaults"];
 
     [stepperCell setProperty:@(min) forKey:@"min"];
-    [stepperCell setProperty:@(max) forKey:@"max"];
+    [stepperCell setProperty:@(doublemax) forKey:@"max"];
     [stepperCell setProperty:@(step) forKey:@"step"];
     [stepperCell setProperty:label forKey:@"label"];
     [stepperCell setProperty:singularLabel forKey:@"singularLabel"];
@@ -166,8 +166,8 @@
             [self newSectionWithTitle:@"Katkıda Bulunanlar" footer:[NSString stringWithFormat:@"SCInsta %@\n\nInstagram v%@", SCIVersionString, [SCIUtils IGVersionString]]], // Güncellendi
             [self newLinkCellWithTitle:@"Geliştirici" detailTitle:@"SoCuul" url:@"https://socuul.dev" iconURL:@"https://i.imgur.com/WSFMSok.png" iconTransparentBG:NO], // Güncellendi
             [self newLinkCellWithTitle:@"Çevirmen" detailTitle:@"LilCiro" url:@"https://github.com/LilCiro" iconURL:@"https://i.imgur.com/WSFMSok.png" iconTransparentBG:NO], // Güncellendi
-            [self newLinkCellWithTitle:@"Türkçe Repoyu Görüntüle" detailTitle:@"Orijinal Repoyu Görüntüle" url:@"https://github.com/SoCuul/SCInsta" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES] // Güncellendi
-            [self newLinkCellWithTitle:@"Orijinal Repoyu Görüntüle" detailTitle:@"Orijinal Repoyu Görüntüle" url:@"https://github.com/SoCuul/SCInsta" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES] // Güncellendi
+            [self newLinkCellWithTitle:@"Türkçe Repo" detailTitle:@"LilCiro tarafından sağlanan Türkçe repoyu görüntüle" url:@"https://github.com/LilCiro/SC" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES], // Türkçe Repo
+            [self newLinkCellWithTitle:@"Orijinal Repo" detailTitle:@"Tweak'in orijinal kaynak kodunu görüntüle" url:@"https://github.com/SoCuul/SCInsta" iconURL:@"https://i.imgur.com/BBUNzeP.png" iconTransparentBG:YES] // Orijinal Repo
         ]];
         
         [self collectDynamicSpecifiersFromArray:_specifiers];
