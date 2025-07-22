@@ -1,0 +1,36 @@
+name: Eski İş Akışı Çalıştırmalarını Temizle 🧹
+
+on:
+  workflow_dispatch: # Bu iş akışını manuel olarak tetiklemeye izin verir
+    inputs:
+      days_to_keep:
+        description: 'Kaç gün öncesine kadar çalıştırmaları saklamak istersiniz? (Varsayılan: 7 gün)'
+        required: false
+        default: '7'
+        type: string
+      dry_run:
+        description: 'Sadece silecekleri listele (silme işlemi yapma)? (true/false)'
+        required: false
+        default: 'true'
+        type: boolean
+  schedule:
+    - cron: '0 0 * * 0' # Her Pazar gece yarısı (UTC) otomatik olarak çalıştır (isteğe bağlı)
+
+jobs:
+  delete_runs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: none
+      actions: write # İş akışı çalıştırmalarını silebilmek için bu izne ihtiyaç duyarız
+
+    steps:
+      - name: Eski İş Akışı Çalıştırmalarını Sil 🗑️
+        uses: kolpav/purge-workflow-runs@v1
+        with:
+          repository: ${{ github.repository }} # Mevcut depoyu kullan
+          retain_days: ${{ github.event.inputs.days_to_keep || 7 }} # Girdiden gelen gün sayısı veya varsayılan 7 gün
+          # Buraya virgülle ayırarak hariç tutulacak iş akışı adlarını ekleyebilirsiniz.
+          # Örneğin: 'Eski İş Akışı Çalıştırmalarını Temizle' iş akışını silmemek için
+          # workflow_exclude: 'Eski İş Akışı Çalıştırmalarını Temizle'
+          min_runs_to_keep: 10 # Her iş akışı için en az 10 çalıştırmayı sakla
+          dry_run: ${{ github.event.inputs.dry_run }} # manuel tetikleyici input'undan dry_run değerini al
