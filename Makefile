@@ -7,13 +7,16 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = SCInsta
 
 $(TWEAK_NAME)_FILES = $(shell find src -type f \( -iname \*.x -o -iname \*.xm -o -iname \*.m \)) $(wildcard modules/JGProgressHUD/*.m)
-$(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation CoreGraphics Photos CoreServices SystemConfiguration SafariServices Security QuartzCore
-$(TWEAK_NAME)_PRIVATE_FRAMEWORKS = Preferences
+$(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation CoreGraphics Photos CoreServices SystemConfiguration SafariServices Security QuartzCore Preferences
+# $(TWEAK_NAME)_PRIVATE_FRAMEWORKS = Preferences # Artık bu satıra gerek yok.
 $(TWEAK_NAME)_EXTRA_FRAMEWORKS = Cephei CepheiPrefs CepheiUI
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc -Wno-unsupported-availability-guard -Wno-unused-value -Wno-deprecated-declarations -Wno-nullability-completeness -Wno-unused-function -Wno-incompatible-pointer-types
 $(TWEAK_NAME)_LOGOSFLAGS = --c warnings=none
 
 CCFLAGS += -std=c++11
+
+# Özel framework yolunu linker'a manuel olarak belirtiyoruz.
+$(TWEAK_NAME)_LDFLAGS += -F$(THEOS)/sdks/PrivateFrameworks
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
