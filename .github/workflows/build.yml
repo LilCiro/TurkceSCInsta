@@ -1,4 +1,6 @@
-name: Build
+# turkcescinsta projesini derleyip paketleyen iş akışı
+
+name: turkcescinsta'yı Derle ve Paketle
 
 on:
   workflow_dispatch:
@@ -35,15 +37,13 @@ jobs:
 
       - name: Build package (rootless)
         run: |
-          # Derleme komutunu çalıştırmadan önce projenizin klasörüne geçilmelidir.
-          # Deponuzun kök dizininde 'main' klasörü varsa bu komut gereklidir.
-          cd main
+          # Proje dosyaları ana dizinde olduğu için "cd main" komutu kaldırıldı.
           THEOS=theos gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload a Build Artifact (rootless)
         uses: actions/upload-artifact@v4
         with:
-          name: packages iphoneos-arm64 (rootless)
+          name: turkcescinsta_packages_iphoneos-arm64 (rootless)
           path: packages/*_iphoneos-arm64.deb
 
   build-rootful:
@@ -77,13 +77,11 @@ jobs:
 
       - name: Build package (rootful)
         run: |
-          # Derleme komutunu çalıştırmadan önce projenizin klasörüne geçilmelidir.
-          # Deponuzun kök dizininde 'main' klasörü varsa bu komut gereklidir.
-          cd main
+          # Proje dosyaları ana dizinde olduğu için "cd main" komutu kaldırıldı.
           THEOS=theos gmake clean package FINALPACKAGE=1
 
       - name: Upload a Build Artifact (rootful)
         uses: actions/upload-artifact@v4
         with:
-          name: packages iphoneos-arm (rootful)
+          name: turkcescinsta_packages_iphoneos-arm (rootful)
           path: packages/*_iphoneos-arm.deb
