@@ -35,8 +35,8 @@ jobs:
 
       - name: Build package (rootless)
         run: |
-          # Derleme komutunu çalıştırmadan önce projenin klasörüne girmelisiniz.
-          # Eğer projenizin klasörü 'main' değilse, bu satırı projenizin adıyla değiştirin.
+          # Derleme komutunu çalıştırmadan önce projenizin klasörüne geçilmelidir.
+          # Deponuzun kök dizininde 'main' klasörü varsa bu komut gereklidir.
           cd main
           THEOS=theos gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
@@ -77,8 +77,8 @@ jobs:
 
       - name: Build package (rootful)
         run: |
-          # Derleme komutunu çalıştırmadan önce projenin klasörüne girmelisiniz.
-          # Eğer projenizin klasörü 'main' değilse, bu satırı projenizin adıyla değiştirin.
+          # Derleme komutunu çalıştırmadan önce projenizin klasörüne geçilmelidir.
+          # Deponuzun kök dizininde 'main' klasörü varsa bu komut gereklidir.
           cd main
           THEOS=theos gmake clean package FINALPACKAGE=1
 
