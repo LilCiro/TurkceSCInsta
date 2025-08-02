@@ -34,7 +34,11 @@ jobs:
         run: brew install make xz ldid
 
       - name: Build package (rootless)
-        run: THEOS=theos gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
+        run: |
+          # Derleme komutunu çalıştırmadan önce projenin klasörüne girmelisiniz.
+          # Eğer projenizin klasörü 'main' değilse, bu satırı projenizin adıyla değiştirin.
+          cd main
+          THEOS=theos gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload a Build Artifact (rootless)
         uses: actions/upload-artifact@v4
@@ -72,9 +76,11 @@ jobs:
         run: brew install make xz ldid
 
       - name: Build package (rootful)
-        # Rootful derlemesi için "THEOS_PACKAGE_SCHEME=rootful" komutu kullanılmaz,
-        # varsayılan olarak rootful derlenir. Bu yüzden komutun sonuna bu parametre eklenmez.
-        run: THEOS=theos gmake clean package FINALPACKAGE=1
+        run: |
+          # Derleme komutunu çalıştırmadan önce projenin klasörüne girmelisiniz.
+          # Eğer projenizin klasörü 'main' değilse, bu satırı projenizin adıyla değiştirin.
+          cd main
+          THEOS=theos gmake clean package FINALPACKAGE=1
 
       - name: Upload a Build Artifact (rootful)
         uses: actions/upload-artifact@v4
