@@ -16,7 +16,6 @@ jobs:
           
       - uses: actions/checkout@main
         with:
-          # Alt modülleri dahil et
           submodules: recursive
 
       - name: Checkout theos/theos
@@ -30,9 +29,8 @@ jobs:
       - name: Checkout SDKs
         uses: actions/checkout@main
         with:
-          repository: xybp888/iOS-SDKs
+          repository: theos/sdks
           ref: master
-          sparse-checkout: iPhoneOS15.5.sdk
           path: theos/sdks
 
       - name: Install dependencies
@@ -56,7 +54,6 @@ jobs:
           
       - uses: actions/checkout@main
         with:
-          # Alt modülleri dahil et
           submodules: recursive
 
       - name: Checkout theos/theos
@@ -70,9 +67,8 @@ jobs:
       - name: Checkout SDKs
         uses: actions/checkout@main
         with:
-          repository: xybp888/iOS-SDKs
+          repository: theos/sdks
           ref: master
-          sparse-checkout: iPhoneOS14.2.sdk
           path: theos/sdks
 
       - name: Install dependencies
