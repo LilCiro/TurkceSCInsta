@@ -1,0 +1,108 @@
+# LCSoundcloud projesini derleyip paketleyen iş akışı
+
+name: LCSoundcloud'u Derle ve Paketle
+
+on:
+  # Bu iş akışını GitHub arayüzünden manuel olarak tetiklemeye izin verir.
+  workflow_dispatch:
+    inputs:
+      upload_artifact:
+        description: "Derleme sonucunu (artifact) GitHub'a yükle"
+        default: true
+        required: false
+        type: boolean
+          
+concurrency:
+  # Aynı anda birden fazla çalıştırmanın nasıl yönetileceğini belirler.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Devam eden çalıştırmaları iptal eder.
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: LCSoundcloud'u Derle
+    # İşin en son macOS sürümünde çalışacağını belirtir.
+    runs-on: macos-latest
+    permissions:
+      # Depo içeriğine yazma izni verir.
+      contents: write
+
+    steps:
+      - name: Ana Depoyu Çek
+        # Depoyu çekmek için checkout eylemini kullanır.
+        uses: actions/checkout@v4
+        with:
+          path: main
+          submodules: recursive
+
+      - name: Bağımlılıkları Yükle
+        # Gerekli araçları (ldid, dpkg, make) Homebrew ile yükler.
+        run: brew install ldid dpkg make
+
+      - name: PATH Ortam Değişkenini Ayarla
+        # 'make' komutunun doğru sürümünü PATH'e ekler.
+        run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH
+
+      - name: Theos'u Kur
+        # Theos deposunu çekmek için checkout eylemini kullanır.
+        uses: actions/checkout@v4
+        with:
+          repository: theos/theos
+          ref: master
+          path: ${{ github.workspace }}/theos
+          submodules: recursive
+            
+      - name: SDK'yı Önbellekle
+        id: SDK
+        # Önbellekleme eylemini kullanır.
+        uses: actions/cache@v4
+        env:
+          cache-name: iPhoneOS14.5.sdk
+        with:
+          path: ${{ github.workspace }}/theos/sdks/
+          key: ${{ env.cache-name }}
+          restore-keys: ${{ env.cache-name }}
+
+      - name: iOS SDK'sını İndir
+        # Eğer SDK önbellekte yoksa çalışır.
+        if: steps.SDK.outputs.cache-hit != 'true'
+        run: |
+          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/xybp888/iOS-SDKs/
+          cd iOS-SDKs
+          git sparse-checkout set --no-cone iPhoneOS14.5.sdk
+          git checkout
+          mv *.sdk $THEOS/sdks
+        env:
+          THEOS: ${{ github.workspace }}/theos
+
+      - name: LCSoundcloud Sürümünü Al
+        id: lcsoundcloud_version
+        run: |
+          LCSOUNDCLOUD_VERSION=$(awk '/Version:/ {print $2}' main/control)
+          echo "LCSOUNDCLOUD_VERSION=${LCSOUNDCLOUD_VERSION}" >> "$GITHUB_ENV"
+          echo "version=${LCSOUNDCLOUD_VERSION}" >> "$GITHUB_OUTPUT"
+            
+      - name: LCSoundcloud tweak'ini derle (deb olarak)
+        run: |
+          cd main
+          mkdir -p packages
+          THEOS_PACKAGE_SCHEME=rootless gmake clean package FINALPACKAGE=1
+          THEOS_PACKAGE_SCHEME=rootful gmake clean package FINALPACKAGE=1
+            
+        env:
+          THEOS: ${{ github.workspace }}/theos
+
+      - name: Paketleri Sürüm Bilgisiyle Yeniden Adlandır
+        run: |
+          cd main/packages
+          mv "$(ls *_iphoneos-arm.deb)" "LCSoundcloud_rootful_v${LCSOUNDCLOUD_VERSION}.deb"
+          mv "$(ls *_iphoneos-arm64.deb)" "LCSoundcloud_rootless_v${LCSOUNDCLOUD_VERSION}.deb"
+
+      - name: Paketleri Artifact Olarak Yükle
+        # Eğer 'upload_artifact' girişi doğru ise çalışır.
+        if: ${{ inputs.upload_artifact }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: LCSoundcloud_packages_v${{ steps.lcsoundcloud_version.outputs.version }}
+          path: ${{ github.workspace }}/main/packages/LCSoundcloud*.deb
+          if-no-files-found: error
