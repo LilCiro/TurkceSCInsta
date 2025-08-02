@@ -13,7 +13,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
-            
+          
       - uses: actions/checkout@main
 
       - name: Checkout theos/theos
@@ -39,7 +39,7 @@ jobs:
         run: THEOS=theos gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload a Build Artifact (rootless)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: packages iphoneos-arm64 (rootless)
           path: packages/*_iphoneos-arm64.deb
@@ -50,7 +50,7 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: '14.2'
-            
+          
       - uses: actions/checkout@main
 
       - name: Checkout theos/theos
@@ -76,7 +76,7 @@ jobs:
         run: THEOS=theos gmake clean package FINALPACKAGE=1
 
       - name: Upload a Build Artifact (rootful)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: packages iphoneos-arm (rootful)
           path: packages/*_iphoneos-arm.deb
