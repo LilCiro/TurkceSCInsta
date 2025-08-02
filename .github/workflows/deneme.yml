@@ -15,6 +15,9 @@ jobs:
           xcode-version: latest-stable
           
       - uses: actions/checkout@main
+        with:
+          # Alt modülleri dahil et
+          submodules: recursive
 
       - name: Checkout theos/theos
         uses: actions/checkout@main
@@ -52,6 +55,9 @@ jobs:
           xcode-version: '14.2'
           
       - uses: actions/checkout@main
+        with:
+          # Alt modülleri dahil et
+          submodules: recursive
 
       - name: Checkout theos/theos
         uses: actions/checkout@main
