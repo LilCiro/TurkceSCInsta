@@ -1,0 +1,123 @@
+# Bu iş akışı aşağıdaki iş akışlarından büyük ölçüde esinlenilmiştir:
+# https://github.com/arichornlover/uYouEnhanced/blob/main/.github/workflows/buildapp.yml
+# https://github.com/ISnackable/YTCubePlus/blob/main/.github/workflows/Build.yml
+# https://github.com/BandarHL/BHTwitter/actions/workflows/build.yml
+
+name: Türkçe SCInsta'yı Derle ve Paketle 📦🚀✨🛠️
+
+on:
+  workflow_dispatch: # Bu iş akışını GitHub arayüzünden manuel olarak tetiklemeye izin verir. 🌐👆⚙️
+    inputs:
+      decrypted_instagram_url: # Şifresi çözülmüş Instagram IPA'sının doğrudan URL'si. 🔗🔐📱📥
+        description: "Şifresi çözülmüş Instagram IPA'sının doğrudan URL'si (Nasıl yapacağınızı bilmiyorsanız sss okuyun)"
+        default: ""
+        required: true
+        type: string
+      upload_artifact: # Oluşturulan paketi GitHub Artifacts'a yükleyip yüklemeyeceği. 📤📂✅☁️
+        description: "Derleme sonucunu (artifact) yükle"
+        default: true
+        required: false
+        type: boolean
+          
+concurrency: # Aynı anda birden fazla çalıştırmanın nasıl yönetileceğini belirler. 🚦🔄⏳🚫
+  group: ${{ github.workflow }}-${{ github.ref }} # Aynı iş akışı ve referans için yalnızca bir çalıştırmaya izin verir.
+  cancel-in-progress: true # Devam eden çalıştırmaları iptal eder.
+
+jobs:
+  build: # Derleme işi. 🏗️💻🍏📦
+    name: SCInsta'yı Derle 🚀✨✅🛠️
+    runs-on: macos-latest # İşin en son macOS sürümünde çalışacağını belirtir. 🍎💻
+    permissions: # İşin sahip olduğu izinler. 🔑🔒
+      contents: write # Depo içeriğine yazma izni verir. ✍️
+
+    steps: # İşin adımları. 👣➡️
+      - name: Ana Depoyu Çek 📥📂🔗🔄
+        uses: actions/checkout@v4 # Depoyu çekmek için checkout eylemini kullanır.
+        with:
+          path: main # Depoyu 'main' dizinine çeker.
+          submodules: recursive # Alt modülleri de özyinelemeli olarak çeker.
+
+      - name: Bağımlılıkları Yükle 📦🔧⚙️📚
+        run: brew install ldid dpkg make # Gerekli araçları (ldid, dpkg, make) Homebrew ile yükler.
+
+      - name: PATH Ortam Değişkenini Ayarla 🛣️🌍⚙️➡️
+        run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH # 'make' komutunun doğru sürümünü PATH'e ekler.
+
+      - name: Theos'u Kur 🍏🛠️⚙️🚀
+        uses: actions/checkout@v4 # Theos deposunu çekmek için checkout eylemini kullanır.
+        with:
+          repository: theos/theos # Theos'un GitHub deposu.
+          ref: master # Master branch'ini çeker.
+          path: ${{ github.workspace }}/theos # Theos'u çalışma alanındaki 'theos' dizinine çeker.
+          submodules: recursive # Theos'un alt modüllerini de özyinelemeli olarak çeker.
+            
+      - name: SDK Önbellekleme 💾⚡️📥🔄
+        id: SDK # Bu adım için bir ID belirler.
+        uses: actions/cache@v4 # Önbellekleme eylemini kullanır.
+        env:
+          cache-name: iPhoneOS14.5.sdk # Önbellek adı.
+        with:
+          path: ${{ github.workspace }}/theos/sdks/ # Önbelleğe alınacak dizin.
+          key: ${{ env.cache-name }} # Önbellek anahtarı.
+          restore-keys: ${{ env.cache-name }} # Geri yüklenecek anahtarlar.
+
+      - name: iOS SDK İndir ⬇️📱🌐📦
+        if: steps.SDK.outputs.cache-hit != 'true' # Eğer SDK önbellekte yoksa çalışır.
+        run: |
+          git clone --quiet -n --depth=1 --filter=tree:0 https://github.com/xybp888/iOS-SDKs/ # iOS SDK'larını içeren depoyu klonlar.
+          cd iOS-SDKs # Dizin değiştirir.
+          git sparse-checkout set --no-cone iPhoneOS14.5.sdk # Sadece belirtilen SDK'yı çeker.
+          git checkout # Çekilen SDK'yı etkinleştirir.
+          mv *.sdk $THEOS/sdks # SDK'yı Theos'un SDK dizinine taşır.
+        env:
+          THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
+
+      - name: Instagram IPA'yı Hazırla 📱📦🔗📥
+        run: |
+          cd main # Ana depo dizinine gider.
+          mkdir -p packages # 'packages' dizini oluşturur.
+          wget "$Instagram_URL" --no-verbose -O packages/com.burbn.instagram.ipa # Belirtilen URL'den Instagram IPA'sını indirir.
+          ls -la packages # 'packages' dizininin içeriğini listeler.
+            
+        env:
+          THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
+          Instagram_URL: ${{ inputs.decrypted_instagram_url }} # Girişlerden alınan Instagram URL'sini kullanır.
+
+      - name: SCInsta Sürümünü Al 🏷️🔢✨📄
+        id: scinsta_version # Bu adım için bir ID belirler.
+        run: |
+          SCINSTA_VERSION=$(awk '/Version:/ {print $2}' main/control) # 'main/control' dosyasından sürüm bilgisini alır.
+          echo "SCINSTA_VERSION=${SCINSTA_VERSION}" >> "$GITHUB_ENV" # Sürümü ortam değişkeni olarak ayarlar.
+          echo "version=${SCINSTA_VERSION}" >> "$GITHUB_OUTPUT" # Sürümü çıktı olarak ayarlar.
+            
+      - name: SCInsta tweak'i sideload için derle (IPA olarak) 🏗️📱🚀📦
+        run: |
+          pip install --force-reinstall https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip # pyzule-rw paketini yükler.
+            
+          cd main # Ana depo dizinine gider.
+          ls -la # Dizin içeriğini listeler.
+
+          ./build.sh sideload # Derleme betiğini sideload moduyla çalıştırır.
+
+          ls -la packages # 'packages' dizininin içeriğini listeler.
+            
+        env:
+          THEOS: ${{ github.workspace }}/theos # THEOS ortam değişkenini ayarlar.
+
+      - name: IPA'yı sürüm bilgisiyle yeniden adlandır 🏷️🔄📦✨
+        run: |
+          cd main/packages # 'packages' dizinine gider.
+          mv "$(ls -t | head -n1)" "SCInsta_sideloaded_v${SCINSTA_VERSION}.ipa" # En son oluşturulan IPA dosyasını sürüm bilgisiyle yeniden adlandırır.
+
+      - name: Paket adını yükleme eylemine ilet 📤📂➡️🔗
+        id: package_name # Bu adım için bir ID belirler.
+        run: |
+          echo "package=$(ls -t main/packages | head -n1)" >> "$GITHUB_OUTPUT" # En son paketin adını çıktı olarak ayarlar.
+
+      - name: Artifact Yükle ⬆️📦☁️✅
+        if: ${{ inputs.upload_artifact }} # Eğer 'upload_artifact' girişi doğru ise çalışır.
+        uses: actions/upload-artifact@v4 # Artifact yükleme eylemini kullanır.
+        with:
+          name: SCInsta_sideloaded_v${{ steps.scinsta_version.outputs.version }} # Yüklenecek artifact'in adı.
+          path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }} # Yüklenecek dosyanın yolu.
+          if-no-files-found: error # Dosya bulunamazsa hata verir.
