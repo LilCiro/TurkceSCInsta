@@ -7,9 +7,9 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = SCInsta
 
 $(TWEAK_NAME)_FILES = $(shell find src -type f \( -iname \*.x -o -iname \*.xm -o -iname \*.m \)) $(wildcard modules/JGProgressHUD/*.m)
-# Aşağıdaki satırda 'Preferences' framework'ünü diğerleriyle birleştirdim.
+# Preferences framework'ünü buraya ekledim.
 $(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation CoreGraphics Photos CoreServices SystemConfiguration SafariServices Security QuartzCore Preferences
-# Artık private frameworks satırına ihtiyacın yok.
+# Bu satırı yoruma aldım, artık buna gerek yok.
 # $(TWEAK_NAME)_PRIVATE_FRAMEWORKS = Preferences
 $(TWEAK_NAME)_EXTRA_FRAMEWORKS = Cephei CepheiPrefs CepheiUI
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc -Wno-unsupported-availability-guard -Wno-unused-value -Wno-deprecated-declarations -Wno-nullability-completeness -Wno-unused-function -Wno-incompatible-pointer-types
