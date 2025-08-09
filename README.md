@@ -114,7 +114,7 @@ TürkçeSCInsta ayarlarını değiştirmek [bu sayfaya](https://github.com/LilCi
    2. Arşivi açın ve `iPhoneOS14.5.sdk` klasörünü `~/theos/sdks` içine kopyalayın
 2. GitHub’dan SCInsta deposunu klonlayın: `git clone --recurse-submodules https://github.com/LilCiro/TurkceSCInsta`
 3. **Sideload için**: Güvenilir bir kaynaktan Instagram’ın şifresi çözülmüş IPA dosyasını indirin ve adını `com.burbn.instagram.ipa` olarak değiştirin.
-   Ardından SCInsta klasöründe `packages` adlı bir klasör oluşturun ve IPA dosyasını içine taşıyın.
+   Ardından TurkceSCInsta klasöründe `packages` adlı bir klasör oluşturun ve IPA dosyasını içine taşıyın.
 
 ### Derleme komutunu çalıştırın
 
